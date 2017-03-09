@@ -26,8 +26,6 @@
 #include "mapper_utilities.h"
 #include "mapper_flags.h"
 
-#include <omp.h>
-
 // For MPI-parallel Mapper
 #ifdef KRATOS_USING_MPI
 #include "mpi.h"

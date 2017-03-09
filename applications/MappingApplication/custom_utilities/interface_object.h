@@ -66,7 +66,7 @@ namespace Kratos
       ///@}
       ///@name Life Cycle
       ///@{
-
+      // TODO hide constructors that are only called from the derived classes
       InterfaceObject() : Point<3>(0.0f, 0.0f, 0.0f) {  // Default Constructor
           SetInitialValuesToMembers();
       }

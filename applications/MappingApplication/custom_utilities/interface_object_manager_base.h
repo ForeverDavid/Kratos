@@ -342,7 +342,9 @@ namespace Kratos
                                                            int& max_receive_buffer_size,
                                                            GraphType& colored_graph,
                                                            int& max_colors) {
-          // TODO error
+          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
+                       << "\"ComputeBufferSizesAndCommunicationGraph\" of the "
+                       << "base class called!" << std::endl;
       }
       virtual void FillBufferWithValues(double* buffer, int& buffer_size, const int comm_partner,
                                         const Variable<double>& variable, Kratos::Flags& options) {
