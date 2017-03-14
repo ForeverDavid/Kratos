@@ -122,6 +122,18 @@ namespace Kratos
           map.emplace(key, value);
       }
 
+      void WriteNeighborCoordinates() {
+          for (auto& interface_obj : m_interface_objects) {
+              interface_obj->WriteCoordinatesToVariable(); 
+          }
+      }
+
+      void PrintNeighbors() {
+          for (auto& interface_obj : m_interface_objects) {
+              interface_obj->PrintMatchInfo(m_comm_rank); 
+          }
+      }
+
       // **********************************************************************
       // Side we want to find neighbors for aka destination *******************
       // **********************************************************************
@@ -241,18 +253,6 @@ namespace Kratos
                        << "class called!" << std::endl;
       }
 
-      virtual std::vector<InterfaceObject::Pointer>& GetDestinationInterfaceObjects() {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"GetDestinationInterfaceObjects\" of the base "
-                       << "class called!" << std::endl;
-      }
-
-      virtual std::vector<InterfaceObject::Pointer>& GetOriginInterfaceObjects() {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"GetOriginInterfaceObjects\" of the base "
-                       << "class called!" << std::endl;
-      }
-
       // ***** InterfaceObjectManagerParallel *****
       virtual void ProcessReceiveBuffer(InterfaceObjectConfigure::ContainerType& remote_p_point_list,
                                 const double* coordinate_list, const int coordinate_list_size,
@@ -307,7 +307,7 @@ namespace Kratos
               if (options.Is(MapperFlags::INTERPOLATE_VALUES)) {
                   buffer[i] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i]);
               } else {
-                  buffer[i] = interface_obj->GetObjectValue(variable);
+                  buffer[i] = interface_obj->GetObjectValue(variable, options);
               }
               ++i;
           }

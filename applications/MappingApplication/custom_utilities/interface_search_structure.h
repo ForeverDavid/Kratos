@@ -129,10 +129,6 @@ namespace Kratos
           }
 
           m_p_interface_object_manager->CheckResults();
-
-          // TODO
-          // PrintPairs(); // makes only sense in serial, since there is no information locally existing abt the neighbor
-          // Might be implemented at some point...
       }
 
 
@@ -335,27 +331,6 @@ namespace Kratos
 
           m_p_interface_object_manager_bins->StoreSearchResults(min_distances, interface_object_results, shape_functions, local_coordinates);
           m_p_interface_object_manager->PostProcessReceivedResults(min_distances, interface_objects);
-      }
-
-      virtual void PrintPairs() {
-          std::vector<InterfaceObject::Pointer> interface_objects = m_p_interface_object_manager->GetDestinationInterfaceObjects();
-          int num_objects = interface_objects.size();
-
-          std::vector<InterfaceObject::Pointer> interface_objects_bins = m_p_interface_object_manager_bins->GetOriginInterfaceObjects();
-          if (num_objects != static_cast<int>(interface_objects_bins.size()))
-              KRATOS_ERROR << "MappingApplication; InterfaceSearchStructure; \"PrintPairs\" size mismatch!" << std::endl;
-          for (int i = 0; i < num_objects; ++i) {
-              if (interface_objects_bins[i] == nullptr) {
-                  std::cout << "InterfaceObject 1 ";
-                  interface_objects[i]->PrintMatchInfo();
-                  std::cout << " has not found a match! " << std::endl;
-              } else {
-                  interface_objects[i]->PrintMatchInfo();
-                  std::cout << " paired with ";
-                  interface_objects_bins[i]->PrintMatchInfo();
-                  std::cout << std::endl;
-              }
-          }
       }
 
 

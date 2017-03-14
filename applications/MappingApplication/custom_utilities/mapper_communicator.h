@@ -304,6 +304,14 @@ namespace Kratos
           m_p_interface_object_manager_destination->ProcessValues(values, destination_variable, options, factor);
       }
 
+      void PrintPairs() {
+          m_p_interface_object_manager_origin->WriteNeighborCoordinates();
+          Kratos::Flags options = Kratos::Flags();
+          options.Set(MapperFlags::NON_HISTORICAL_DATA);
+          TransferNodalData(NEIGHBOR_COORDINATES, NEIGHBOR_COORDINATES, options);
+          m_p_interface_object_manager_destination->PrintNeighbors();
+      }
+
       ///@}
       ///@name Protected  Access
       ///@{
@@ -349,6 +357,7 @@ namespace Kratos
                                 const int i_max_search_iterations) {
           m_p_search_structure->Search(i_initial_search_radius,
                                        i_max_search_iterations);
+          PrintPairs();
       }
 
       template <typename T>

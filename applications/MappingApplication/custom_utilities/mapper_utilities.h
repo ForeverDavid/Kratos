@@ -223,11 +223,12 @@ namespace Kratos
           local_coords[0] = point_projected_local_coords[0];
           local_coords[1] = 0.0;
 
+          /*
           std::cout << "Point to project: [" << global_coords[0] << " " << global_coords[1] << " " << global_coords[2] << "], local points: [" <<
           p_condition->GetGeometry()[0].X() << " " << p_condition->GetGeometry()[0].Y() << " " << p_condition->GetGeometry()[0].Z() << "] ["<<
           p_condition->GetGeometry()[1].X() << " " << p_condition->GetGeometry()[1].Y() << " " << p_condition->GetGeometry()[1].Z() << "] local coord: " <<
           local_coords[0] << std::endl;
-
+          */
 
           if (-1.0-MapperUtilities::tol_local_coords < local_coords[0] && local_coords[0] < 1.0+MapperUtilities::tol_local_coords) {
               return true;

@@ -31,6 +31,7 @@ namespace Kratos
     KRATOS_CREATE_LOCAL_FLAG( MapperFlags, REMESHED,                 3 );
     KRATOS_CREATE_LOCAL_FLAG( MapperFlags, NON_CONFORMING_INTERFACE, 4 );
     KRATOS_CREATE_LOCAL_FLAG( MapperFlags, INTERPOLATE_VALUES,       5 );
+    KRATOS_CREATE_LOCAL_FLAG( MapperFlags, NON_HISTORICAL_DATA,      6 );
 }  // namespace Kratos.
 
 #endif // KRATOS_MAPPER_FLAGS_CPP_INCLUDED  defined

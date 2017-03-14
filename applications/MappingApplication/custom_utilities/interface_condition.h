@@ -93,16 +93,6 @@ namespace Kratos
       ///@name Operations
       ///@{
 
-      int GetObjectId() override {
-          return m_p_condition->Id();
-      }
-
-      void PrintMatchInfo() override {
-          std::cout << "InteraceCondition; Id = " << GetObjectId()
-                    << "; Coordinates = [" << this->X() << " "
-                    << this->Y() << " " << this->Z() << "]";
-      }
-
       bool EvaluateResult(array_1d<double, 3> global_coords, double& min_distance,
                           double distance, array_1d<double,2>& local_coords,
                           std::vector<double>& shape_function_values) override { // I am an object in the bins
@@ -152,6 +142,29 @@ namespace Kratos
           return is_closer;
       }
 
+      // Scalars
+      double GetObjectValue(const Variable<double>& variable,
+                            const Kratos::Flags& options) override {
+        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
+        //       << "Not accessible for Conditions" << std::endl;
+
+          return m_p_condition->GetValue(variable);
+      }
+
+      void SetObjectValue(const Variable<double>& variable,
+                          const double value,
+                          const Kratos::Flags& options,
+                          const double factor) override {
+
+        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
+        //       << "Not accessible for Conditions" << std::endl;
+          if (options.Is(MapperFlags::ADD_VALUES)) {
+              double old_value = m_p_condition->GetValue(variable);
+              m_p_condition->SetValue(variable, old_value + value * factor);
+          } else {
+              m_p_condition->SetValue(variable, value * factor);
+          } 
+      }
 
       double GetObjectValueInterpolated(const Variable<double>& variable,
                                         std::vector<double>& shape_function_values) override {
@@ -160,6 +173,29 @@ namespace Kratos
               interpolated_value += m_p_condition->GetGeometry().GetPoint(i).FastGetSolutionStepValue(variable) * shape_function_values[i];
           }
           return interpolated_value;
+      }
+
+      // Vectors
+      array_1d<double,3> GetObjectValue(const Variable< array_1d<double,3> >& variable,
+                                        const Kratos::Flags& options) override {
+        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
+        //       << "Not accessible for Conditions" << std::endl;
+          
+          return m_p_condition->GetValue(variable);
+      }
+
+      void SetObjectValue(const Variable< array_1d<double,3> >& variable,
+                          const array_1d<double,3>& value,
+                          const Kratos::Flags& options,
+                          const double factor) override {
+        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
+        //       << "Not accessible for Conditions" << std::endl;
+          if (options.Is(MapperFlags::ADD_VALUES)) {
+              array_1d<double,3> old_value = m_p_condition->GetValue(variable);
+              m_p_condition->SetValue(variable, old_value + value * factor);
+          } else {
+              m_p_condition->SetValue(variable, value * factor);
+          }
       }
 
       array_1d<double,3> GetObjectValueInterpolated(const Variable< array_1d<double,3> >& variable,
@@ -174,6 +210,34 @@ namespace Kratos
               interpolated_value[2] += m_p_condition->GetGeometry().GetPoint(i).FastGetSolutionStepValue(variable)[2] * shape_function_values[i];
           }
           return interpolated_value;
+      }
+
+      // Functions used for Debugging
+      int GetObjectId() override {
+          return m_p_condition->Id();
+      }
+
+      void PrintMatchInfo(const int comm_rank) override {
+          array_1d<double, 3> neighbor_coordinates = m_p_condition->GetValue(NEIGHBOR_COORDINATES);
+          std::cout << "InteraceCondition; Rank " << comm_rank
+                    << " , Id = " << GetObjectId()
+                    << "; Coordinates = [" 
+                    << this->X() << " "
+                    << this->Y() << " " 
+                    << this->Z() << "], Neighbor = ["
+                    << neighbor_coordinates[0] << " " 
+                    << neighbor_coordinates[1] << " "
+                    << neighbor_coordinates[2] << "]" << std::endl;
+      }
+
+      void WriteCoordinatesToVariable() override {
+          // This function writes the coordinates of the InterfaceObject 
+          // to the variable "NEIGHBOR_COORDINATES", for debugging
+          array_1d<double,3> neighbor_coordinates;
+          neighbor_coordinates[0] = this->X();
+          neighbor_coordinates[1] = this->Y();
+          neighbor_coordinates[2] = this->Z();
+          m_p_condition->SetValue(NEIGHBOR_COORDINATES, neighbor_coordinates);
       }
 
       ///@}

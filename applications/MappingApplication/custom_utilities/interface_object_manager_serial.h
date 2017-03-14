@@ -136,14 +136,6 @@ namespace Kratos
           }
       }
 
-      std::vector<InterfaceObject::Pointer>& GetDestinationInterfaceObjects() override {
-          return m_send_objects[m_comm_rank];
-      }
-
-      std::vector<InterfaceObject::Pointer>& GetOriginInterfaceObjects() override {
-          return m_receive_objects[m_comm_rank];
-      }
-
       ///@}
       ///@name Access
       ///@{

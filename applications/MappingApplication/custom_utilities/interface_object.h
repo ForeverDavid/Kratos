@@ -25,6 +25,7 @@
 // Project includes
 #include "includes/define.h"
 #include "mapper_utilities.h"
+#include "../mapping_application_variables.h"
 
 
 namespace Kratos
@@ -157,7 +158,7 @@ namespace Kratos
           return -1;
       }
 
-      virtual void PrintMatchInfo() {
+      virtual void PrintMatchInfo(const int comm_rank) {
           KRATOS_ERROR << "MappingApplication; InterfaceObject; \"PrintMatchInfo\" "
                        << "of the base class called!" << std::endl;
       }
@@ -172,7 +173,8 @@ namespace Kratos
 
       // These functions have to be duplicated because virtual templates are not possible in C++
       // Scalars
-      virtual double GetObjectValue(const Variable<double>& variable) {
+      virtual double GetObjectValue(const Variable<double>& variable,
+                                    const Kratos::Flags& options) {
           KRATOS_ERROR << "MappingApplication; InterfaceObject; \"GetObjectValue, "
                        << "double\" of the base class called!" << std::endl;
       }
@@ -193,7 +195,8 @@ namespace Kratos
       }
 
       // Vectors
-      virtual array_1d<double,3> GetObjectValue(const Variable< array_1d<double,3> >& variable) {
+      virtual array_1d<double,3> GetObjectValue(const Variable< array_1d<double,3> >& variable,
+                                                const Kratos::Flags& options) {
           KRATOS_ERROR << "MappingApplication; InterfaceObject; \"GetObjectValue, "
                        << "double<3>\" of the base class called!" << std::endl;
       }
@@ -211,6 +214,11 @@ namespace Kratos
           KRATOS_ERROR << "MappingApplication; InterfaceObject; "
                        << "\"GetObjectValueInterpolated, double<3>\" of the base "
                        << "class called!" << std::endl;
+      }
+
+      virtual void WriteCoordinatesToVariable() { 
+          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"WriteCoordinatesToVariable\" "
+                       << "of the base class called!" << std::endl;
       }
 
       ///@}

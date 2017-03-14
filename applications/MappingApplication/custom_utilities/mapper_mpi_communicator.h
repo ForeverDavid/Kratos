@@ -248,7 +248,7 @@ namespace Kratos
       }
 
       void InvokeSearch(const double i_initial_search_radius,
-                                const int i_max_search_iterations) {
+                        const int i_max_search_iterations) override {
           m_p_search_structure->Search(i_initial_search_radius,
                                        i_max_search_iterations);
 
@@ -257,6 +257,7 @@ namespace Kratos
                                            m_max_receive_buffer_size,
                                            m_colored_graph,
                                            m_max_colors);
+          PrintPairs();
       }
 
       template <typename T>

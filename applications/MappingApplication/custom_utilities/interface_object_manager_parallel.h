@@ -341,7 +341,7 @@ namespace Kratos
               if (options.Is(MapperFlags::INTERPOLATE_VALUES)) {
                   buffer[i] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i]);
               } else {
-                  buffer[i] = interface_obj->GetObjectValue(variable);
+                  buffer[i] = interface_obj->GetObjectValue(variable, options);
               }
               ++i;
           }
@@ -372,9 +372,9 @@ namespace Kratos
                   buffer[(i*3) + 1] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i])[1];
                   buffer[(i*3) + 2] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i])[2];
               } else {
-                  buffer[(i*3) + 0] = interface_obj->GetObjectValue(variable)[0];
-                  buffer[(i*3) + 1] = interface_obj->GetObjectValue(variable)[1];
-                  buffer[(i*3) + 2] = interface_obj->GetObjectValue(variable)[2];
+                  buffer[(i*3) + 0] = interface_obj->GetObjectValue(variable, options)[0];
+                  buffer[(i*3) + 1] = interface_obj->GetObjectValue(variable, options)[1];
+                  buffer[(i*3) + 2] = interface_obj->GetObjectValue(variable, options)[2];
               }
               ++i;
           }
