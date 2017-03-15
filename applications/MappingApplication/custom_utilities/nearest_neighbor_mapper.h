@@ -7,7 +7,7 @@
 //  License:		 BSD License
 //					 Kratos default license: kratos/license.txt
 //
-//  Main authors:    Philipp Bucher
+//  Main authors:    Philipp Bucher, Jordi Cotela
 //
 
 #if !defined(KRATOS_NEAREST_NEIGHBOR_MAPPER_H_INCLUDED )

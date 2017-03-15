@@ -42,7 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 //
 //   Project Name:        Kratos
-//   Last Modified by:    $Author: anonymous $
+//   Last Modified by:    $Author: Philipp Bucher, Jordi Cotela $
 //   Date:                $Date: 2008-05-27 10:39:48 $
 //   Revision:            $Revision: 1.1 $
 //

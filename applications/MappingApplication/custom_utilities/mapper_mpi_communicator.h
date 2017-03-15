@@ -7,7 +7,7 @@
 //  License:		 BSD License
 //					 Kratos default license: kratos/license.txt
 //
-//  Main authors:    Philipp Bucher
+//  Main authors:    Philipp Bucher, Jordi Cotela
 
 #if !defined(KRATOS_MAPPER_MPI_COMMUNICATOR_H_INCLUDED )
 #define  KRATOS_MAPPER_MPI_COMMUNICATOR_H_INCLUDED
@@ -88,32 +88,32 @@ namespace Kratos
       ///@name Operations
       ///@{
 
-      void InitializeOrigin(MapperUtilities::InterfaceObjectConstructionType i_interface_object_type_origin,
-                      GeometryData::IntegrationMethod i_integration_method_origin = GeometryData::NumberOfIntegrationMethods) override {
+      void InitializeOrigin(MapperUtilities::InterfaceObjectConstructionType InterfaceObjectTypeOrigin,
+                      GeometryData::IntegrationMethod IntegrationMethodOrigin = GeometryData::NumberOfIntegrationMethods) override {
 
-          m_p_interface_object_manager_origin = InterfaceObjectManagerParallel::Pointer(
-              new InterfaceObjectManagerParallel(m_model_part_origin, MyPID(),
+          mpInterfaceObjectManagerOrigin = InterfaceObjectManagerParallel::Pointer(
+              new InterfaceObjectManagerParallel(mrModelPartOrigin, MyPID(),
                                                  TotalProcesses(),
-                                                 i_interface_object_type_origin,
-                                                 i_integration_method_origin,
-                                                 m_echo_level) );
+                                                 InterfaceObjectTypeOrigin,
+                                                 IntegrationMethodOrigin,
+                                                 mEchoLevel) );
 
-          m_interface_object_type_origin = i_interface_object_type_origin;
-          m_integration_method_origin = i_integration_method_origin;
+          mInterfaceObjectTypeOrigin = InterfaceObjectTypeOrigin;
+          mIntegrationMethodOrigin = IntegrationMethodOrigin;
       }
 
-      void InitializeDestination(MapperUtilities::InterfaceObjectConstructionType i_interface_object_type_destination,
-                      GeometryData::IntegrationMethod i_integration_method_destination = GeometryData::NumberOfIntegrationMethods) override {
+      void InitializeDestination(MapperUtilities::InterfaceObjectConstructionType InterfaceObjectTypeDestination,
+                      GeometryData::IntegrationMethod IntegrationMethodDestination = GeometryData::NumberOfIntegrationMethods) override {
 
-          m_p_interface_object_manager_destination = InterfaceObjectManagerParallel::Pointer(
-              new InterfaceObjectManagerParallel(m_model_part_destination, MyPID(),
+          mpInterfaceObjectManagerDestination = InterfaceObjectManagerParallel::Pointer(
+              new InterfaceObjectManagerParallel(mrModelPartDestination, MyPID(),
                                                  TotalProcesses(),
-                                                 i_interface_object_type_destination,
-                                                 i_integration_method_destination,
-                                                 m_echo_level) );
+                                                 InterfaceObjectTypeDestination,
+                                                 IntegrationMethodDestination,
+                                                 mEchoLevel) );
 
-          m_interface_object_type_destination = i_interface_object_type_destination;
-          m_integration_method_destination = i_integration_method_destination;
+          mInterfaceObjectTypeDestination = InterfaceObjectTypeDestination;
+          mIntegrationMethodDestination = IntegrationMethodDestination;
       }
 
 
@@ -138,7 +138,8 @@ namespace Kratos
                                             Kratos::Flags& rOptions,
                                             double Factor = 1.0f) override {
           rOptions.Set(MapperFlags::INTERPOLATE_VALUES);
-          m_model_part_origin.GetCommunicator().SynchronizeVariable(rOriginVariable);
+          mrModelPartOrigin.GetCommunicator().SynchronizeVariable(rOriginVariable); // required bcs 
+          // data interpolation can also involve ghost nodes
           TransferDataParallel(rOriginVariable, rDestinationVariable,
                                rOptions, Factor);                            
       }
@@ -149,7 +150,8 @@ namespace Kratos
                                             Kratos::Flags& rOptions,
                                             double Factor = 1.0f) override {
           rOptions.Set(MapperFlags::INTERPOLATE_VALUES);
-          m_model_part_origin.GetCommunicator().SynchronizeVariable(rOriginVariable);
+          mrModelPartOrigin.GetCommunicator().SynchronizeVariable(rOriginVariable); // required bcs 
+          // data interpolation can also involve ghost nodes
           TransferDataParallel(rOriginVariable, rDestinationVariable,
                                rOptions, Factor);
       }
@@ -248,11 +250,11 @@ namespace Kratos
       ///@name Member Variables
       ///@{
 
-      int m_max_send_buffer_size;
-      int m_max_receive_buffer_size;
+      int mMaxSendBufferSize;
+      int mMaxReceiveBufferSize;
 
-      GraphType m_colored_graph;
-      int m_max_colors;
+      GraphType mColoredGraph;
+      int mMaxColors;
 
       ///@}
       ///@name Private Operators
@@ -264,22 +266,22 @@ namespace Kratos
       ///@{
 
       void InitializeSearchStructure() override {
-          m_p_search_structure = InterfaceSearchStructure::Pointer ( new InterfaceSearchStructureMPI(
-             m_p_interface_object_manager_destination, m_p_interface_object_manager_origin, m_model_part_origin,
-             MyPID(), TotalProcesses(), m_echo_level) );
+          mpSearchStructure = InterfaceSearchStructure::Pointer ( new InterfaceSearchStructureMPI(
+             mpInterfaceObjectManagerDestination, mpInterfaceObjectManagerOrigin, mrModelPartOrigin,
+             MyPID(), TotalProcesses(), mEchoLevel) );
       }
 
       void InvokeSearch(const double InitialSearchRadius,
                         const int MaxSearchIterations) override {
-          m_p_search_structure->Search(InitialSearchRadius,
+          mpSearchStructure->Search(InitialSearchRadius,
                                        MaxSearchIterations);
 
-          m_p_interface_object_manager_destination->ComputeBufferSizesAndCommunicationGraph(
-                                           m_max_send_buffer_size,
-                                           m_max_receive_buffer_size,
-                                           m_colored_graph,
-                                           m_max_colors);
-          // if (m_echo_level > 2) {
+          mpInterfaceObjectManagerDestination->ComputeBufferSizesAndCommunicationGraph(
+                                           mMaxSendBufferSize,
+                                           mMaxReceiveBufferSize,
+                                           mColoredGraph,
+                                           mMaxColors);
+          // if (mEchoLevel > 2) {
               PrintPairs();
           // }  
       }
@@ -310,8 +312,8 @@ namespace Kratos
           int send_buffer_size = 0;
           int receive_buffer_size = 0;
 
-          int max_send_buffer_size= m_max_send_buffer_size;
-          int max_receive_buffer_size = m_max_receive_buffer_size;
+          int max_send_buffer_size= mMaxSendBufferSize;
+          int max_receive_buffer_size = mMaxReceiveBufferSize;
 
           int buffer_size_factor = MapperUtilitiesMPI::SizeOfVariable(T());
 
@@ -321,16 +323,16 @@ namespace Kratos
           double* send_buffer = new double[max_send_buffer_size];
           double* receive_buffer = new double[max_receive_buffer_size];
           
-          for (int i = 0; i < m_max_colors; ++i) { // loop over communication steps (aka. colour)
-              int comm_partner = m_colored_graph(MyPID(), i); // get the partner rank
+          for (int i = 0; i < mMaxColors; ++i) { // loop over communication steps (aka. colour)
+              int comm_partner = mColoredGraph(MyPID(), i); // get the partner rank
               if (comm_partner != -1) { // check if rank is communicating in this communication step (aka. colour)
-                  m_p_interface_object_manager_origin->FillBufferWithValues(send_buffer, send_buffer_size, comm_partner,
+                  mpInterfaceObjectManagerOrigin->FillBufferWithValues(send_buffer, send_buffer_size, comm_partner,
                                                                             rOriginVariable, rOptions);
 
                   MapperUtilitiesMPI::MpiSendRecv(send_buffer, receive_buffer, send_buffer_size, receive_buffer_size,
                                                   max_send_buffer_size, max_receive_buffer_size, comm_partner);
 
-                  m_p_interface_object_manager_destination->ProcessValues(receive_buffer, receive_buffer_size, comm_partner,
+                  mpInterfaceObjectManagerDestination->ProcessValues(receive_buffer, receive_buffer_size, comm_partner,
                                                                           rDestinationVariable, rOptions, Factor);
               } // if I am communicating in this loop (comm_partner != -1)
           } // loop colors

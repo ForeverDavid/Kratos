@@ -7,7 +7,7 @@
 //  License:		 BSD License
 //					 Kratos default license: kratos/license.txt
 //
-//  Main authors:    Philipp Bucher
+//  Main authors:    Philipp Bucher, Jordi Cotela
 
 #if !defined(KRATOS_MAPPER_FLAGS_CPP_INCLUDED )
 #define  KRATOS_MAPPER_FLAGS_CPP_INCLUDED
