@@ -69,13 +69,13 @@ namespace Kratos
       ///@{
 
       MapperCommunicator(ModelPart& i_model_part_origin, ModelPart& i_model_part_destination,
-                         Parameters& i_json_parameters) :
+                         Parameters& rJsonParameters) :
             m_model_part_origin(i_model_part_origin),
             m_model_part_destination(i_model_part_destination) {
 
-          m_initial_search_radius = i_json_parameters["search_radius"].GetDouble();
-          m_max_search_iterations = i_json_parameters["search_iterations"].GetInt();
-          m_echo_level = i_json_parameters["echo_level"].GetInt();
+          m_initial_search_radius = rJsonParameters["search_radius"].GetDouble();
+          m_max_search_iterations = rJsonParameters["search_iterations"].GetInt();
+          m_echo_level = rJsonParameters["echo_level"].GetInt();
       }
 
       /// Destructor.
@@ -357,7 +357,9 @@ namespace Kratos
                                 const int i_max_search_iterations) {
           m_p_search_structure->Search(i_initial_search_radius,
                                        i_max_search_iterations);
-          PrintPairs();
+          if (m_echo_level > 2) {
+              PrintPairs();
+          }                
       }
 
       template <typename T>

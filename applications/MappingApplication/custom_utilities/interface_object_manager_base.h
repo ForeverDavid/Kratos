@@ -114,9 +114,7 @@ namespace Kratos
       void MapInsertElement(std::unordered_map<int, T>& map, int key, T& value) {
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (map.count(key) > 0) {
-                  KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                               << "\"InsertElement\" Key already present in Map!"
-                               << std::endl;
+                  KRATOS_ERROR << "Key already present in Map!" << std::endl;
               }
           }
           map.emplace(key, value);
@@ -163,16 +161,12 @@ namespace Kratos
 
       // ***** InterfaceObjectManagerSerial *****
       virtual void GetInterfaceObjectsSerialSearch(InterfaceObjectConfigure::ContainerType& candidate_send_objects) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"GetInterfaceObjectsSerialSearch\" of the base class called!"
-                       << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void PostProcessReceivedResults(const std::vector<double>& distances,
                                               const InterfaceObjectConfigure::ContainerType& candidate_send_objects) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"PostProcessReceivedResults\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // ***** InterfaceObjectManagerParallel *****
@@ -180,64 +174,48 @@ namespace Kratos
                                               int* local_memory_size_array,
                                               double* global_bounding_boxes,
                                               const bool last_iteration) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ComputeCandidatePartitions\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // Function for debugging
       virtual void PrintCandidatePartitions(const InterfaceObject::Pointer point,
                                             std::vector<int>& partition_list) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"PrintCandidatePartitions\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void PrepareMatching(CandidateManager& candidate_manager, int* local_comm_list,
                                    int* local_memory_size_array) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"PrepareMatching\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void FillSendBufferWithMatchInformation(CandidateManager& candidate_manager,
                                                       int* send_buffer, int& send_buffer_size,
                                                       const int comm_partner){
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"FillSendBufferWithMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void FillBufferLocalSearch(CandidateManager& candidate_manager,
                                          InterfaceObjectConfigure::ContainerType& send_points,
                                          int& num_objects) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"FillBufferLocalSearch\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void FillSendBufferRemoteSearch(CandidateManager& candidate_manager,
                                               double* send_buffer, int& send_buffer_size,
                                               const int comm_partner) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"FillSendBufferRemoteSearch\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void PostProcessReceivedResults(CandidateManager& candidate_manager,
                                               const std::vector<double>& distances,
                                               const int comm_partner) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"PostProcessReceivedResults, std::vector<double> \" "
-                       << "of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void PostProcessReceivedResults(CandidateManager& candidate_manager,
                                               const double* distances,
                                               const int comm_partner) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"PostProcessReceivedResults, C-array\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // **********************************************************************
@@ -248,25 +226,19 @@ namespace Kratos
                                       const std::vector<InterfaceObject::Pointer> temp_closest_results,
                                       const std::vector<std::vector<double>> temp_shape_functions,
                                       const std::vector<array_1d<double,2>> temp_local_coordinates) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"StoreSearchResults\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // ***** InterfaceObjectManagerParallel *****
       virtual void ProcessReceiveBuffer(InterfaceObjectConfigure::ContainerType& remote_p_point_list,
                                 const double* coordinate_list, const int coordinate_list_size,
-                                int& num_objects){
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessReceiveBuffer\" of the base "
-                       << "class called!" << std::endl;
+                                int& num_objects) {
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void FillSendBufferWithResults(double* send_buffer, const int send_buffer_size,
-                                             const std::vector<double>& min_distances){
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"FillSendBufferWithResults\" of the base "
-                       << "class called!" << std::endl;
+                                             const std::vector<double>& min_distances) {
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void StoreTempSearchResults(CandidateManager& candidate_manager,
@@ -274,17 +246,13 @@ namespace Kratos
                                           const std::vector<std::vector<double>> temp_shape_functions,
                                           const std::vector<array_1d<double,2>> temp_local_coordinates,
                                           const int comm_partner) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"StoreTempSearchResults\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void ProcessMatchInformation(CandidateManager& candidate_manager,
                                            int* buffer, const int buffer_size,
-                                           const int comm_partner){
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+                                           const int comm_partner) {
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // **********************************************************************
@@ -323,8 +291,7 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
              if (interface_objects.size() != buffer.size()) {
-                 KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                              << "\"ProcessValues, T\": Wrong number of results "
+                 KRATOS_ERROR << "Wrong number of results "
                               << "received!;\" interface_objects.size() = "
                               << interface_objects.size() << ", buffer.size() = "
                               << buffer.size() << std::endl;
@@ -342,39 +309,29 @@ namespace Kratos
                                                            int& max_receive_buffer_size,
                                                            GraphType& colored_graph,
                                                            int& max_colors) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ComputeBufferSizesAndCommunicationGraph\" of the "
-                       << "base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
       virtual void FillBufferWithValues(double* buffer, int& buffer_size, const int comm_partner,
                                         const Variable<double>& variable, Kratos::Flags& options) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void FillBufferWithValues(double* buffer, int& buffer_size, const int comm_partner,
                                         const Variable< array_1d<double,3> >& variable,
                                         Kratos::Flags& options) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void ProcessValues(const double* buffer, const int buffer_size, const int comm_partner,
                          const Variable<double>& variable,
                          Kratos::Flags& options, const double factor) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void ProcessValues(const double* buffer, const int buffer_size, const int comm_partner,
                          const Variable< array_1d<double,3> >& variable,
                          Kratos::Flags& options, const double factor) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; "
-                       << "\"ProcessMatchInformation\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       ///@}

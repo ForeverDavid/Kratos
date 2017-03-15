@@ -71,9 +71,9 @@ namespace Kratos
       ///@name Life Cycle
       ///@{
 
-      MapperMPICommunicator(ModelPart& i_model_part_origin, ModelPart& i_model_part_destination,
-                            Parameters& i_json_parameters) :
-            MapperCommunicator(i_model_part_origin, i_model_part_destination, i_json_parameters) { }
+      MapperMPICommunicator(ModelPart& rModelPartOrigin, ModelPart& rModelPartDestination,
+                            Parameters& rJsonParameters) :
+            MapperCommunicator(rModelPartOrigin, rModelPartDestination, rJsonParameters) { }
 
       /// Destructor.
       virtual ~MapperMPICommunicator() { }
@@ -118,18 +118,40 @@ namespace Kratos
 
 
 
-      void TransferNodalData(const Variable<double>& origin_variable,
-                             const Variable<double>& destination_variable,
-                             Kratos::Flags& options,
-                             double factor = 1.0f) override {
-          TransferDataParallel(origin_variable, destination_variable, options, factor);
+      void TransferNodalData(const Variable<double>& rOriginVariable,
+                             const Variable<double>& rDestinationVariable,
+                             Kratos::Flags& rOptions,
+                             double Factor = 1.0f) override {
+          TransferDataParallel(rOriginVariable, rDestinationVariable, rOptions, Factor);
       }
 
-      void TransferNodalData(const Variable< array_1d<double,3> >& origin_variable,
-                             const Variable< array_1d<double,3> >& destination_variable,
-                             Kratos::Flags& options,
-                             double factor = 1.0f) override {
-          TransferDataParallel(origin_variable, destination_variable, options, factor);
+      void TransferNodalData(const Variable< array_1d<double,3> >& rOriginVariable,
+                             const Variable< array_1d<double,3> >& rDestinationVariable,
+                             Kratos::Flags& rOptions,
+                             double Factor = 1.0f) override {
+          TransferDataParallel(rOriginVariable, rDestinationVariable, rOptions, Factor);
+      }
+
+      // Interface function for mapper developers; scalar version
+      void TransferInterpolatedData(const Variable<double>& rOriginVariable,
+                                            const Variable<double>& rDestinationVariable,
+                                            Kratos::Flags& rOptions,
+                                            double Factor = 1.0f) override {
+          rOptions.Set(MapperFlags::INTERPOLATE_VALUES);
+          m_model_part_origin.GetCommunicator().SynchronizeVariable(rOriginVariable);
+          TransferDataParallel(rOriginVariable, rDestinationVariable,
+                               rOptions, Factor);                            
+      }
+
+      // Interface function for mapper developers; vector version
+      void TransferInterpolatedData(const Variable< array_1d<double,3> >& rOriginVariable,
+                                            const Variable< array_1d<double,3> >& rDestinationVariable,
+                                            Kratos::Flags& rOptions,
+                                            double Factor = 1.0f) override {
+          rOptions.Set(MapperFlags::INTERPOLATE_VALUES);
+          m_model_part_origin.GetCommunicator().SynchronizeVariable(rOriginVariable);
+          TransferDataParallel(rOriginVariable, rDestinationVariable,
+                               rOptions, Factor);
       }
 
       int MyPID () override { // Copy from "kratos/includes/mpi_communicator.h"
@@ -247,46 +269,44 @@ namespace Kratos
              MyPID(), TotalProcesses(), m_echo_level) );
       }
 
-      void InvokeSearch(const double i_initial_search_radius,
-                        const int i_max_search_iterations) override {
-          m_p_search_structure->Search(i_initial_search_radius,
-                                       i_max_search_iterations);
+      void InvokeSearch(const double InitialSearchRadius,
+                        const int MaxSearchIterations) override {
+          m_p_search_structure->Search(InitialSearchRadius,
+                                       MaxSearchIterations);
 
           m_p_interface_object_manager_destination->ComputeBufferSizesAndCommunicationGraph(
                                            m_max_send_buffer_size,
                                            m_max_receive_buffer_size,
                                            m_colored_graph,
                                            m_max_colors);
-          PrintPairs();
+          // if (m_echo_level > 2) {
+              PrintPairs();
+          // }  
       }
 
       template <typename T>
-      void TransferDataParallel(const Variable< T >& origin_variable,
-                                const Variable< T >& destination_variable,
-                                Kratos::Flags& options,
-                                double factor) {
-          if (options.Is(MapperFlags::SWAP_SIGN)) {
-              factor *= (-1);
+      void TransferDataParallel(const Variable< T >& rOriginVariable,
+                                const Variable< T >& rDestinationVariable,
+                                Kratos::Flags& rOptions,
+                                double Factor) {
+          if (rOptions.Is(MapperFlags::SWAP_SIGN)) {
+              Factor *= (-1);
           }
-
-          ExchangeDataLocal(origin_variable, destination_variable,
-                            options, factor);
-
-          ExchangeDataRemote(origin_variable, destination_variable,
-                             options, factor,
-                             m_p_interface_object_manager_origin,
-                             m_p_interface_object_manager_destination);
+          
+          ExchangeDataLocal(rOriginVariable, rDestinationVariable,
+                            rOptions, Factor);
+                            
+          ExchangeDataRemote(rOriginVariable, rDestinationVariable,
+                             rOptions, Factor);
 
           MPI_Barrier(MPI_COMM_WORLD);
       }
 
       template <typename T>
-      void ExchangeDataRemote(const Variable< T >& origin_variable,
-                              const Variable< T >& destination_variable,
-                              Kratos::Flags& options,
-                              const double factor,
-                              InterfaceObjectManagerBase::Pointer& object_manager_1,
-                              InterfaceObjectManagerBase::Pointer& object_manager_2) {
+      void ExchangeDataRemote(const Variable< T >& rOriginVariable,
+                              const Variable< T >& rDestinationVariable,
+                              Kratos::Flags& rOptions,
+                              const double Factor) {
           int send_buffer_size = 0;
           int receive_buffer_size = 0;
 
@@ -300,18 +320,18 @@ namespace Kratos
 
           double* send_buffer = new double[max_send_buffer_size];
           double* receive_buffer = new double[max_receive_buffer_size];
-
+          
           for (int i = 0; i < m_max_colors; ++i) { // loop over communication steps (aka. colour)
               int comm_partner = m_colored_graph(MyPID(), i); // get the partner rank
               if (comm_partner != -1) { // check if rank is communicating in this communication step (aka. colour)
                   m_p_interface_object_manager_origin->FillBufferWithValues(send_buffer, send_buffer_size, comm_partner,
-                                                                            origin_variable, options);
+                                                                            rOriginVariable, rOptions);
 
                   MapperUtilitiesMPI::MpiSendRecv(send_buffer, receive_buffer, send_buffer_size, receive_buffer_size,
                                                   max_send_buffer_size, max_receive_buffer_size, comm_partner);
 
                   m_p_interface_object_manager_destination->ProcessValues(receive_buffer, receive_buffer_size, comm_partner,
-                                                                          destination_variable, options, factor);
+                                                                          rDestinationVariable, rOptions, Factor);
               } // if I am communicating in this loop (comm_partner != -1)
           } // loop colors
 

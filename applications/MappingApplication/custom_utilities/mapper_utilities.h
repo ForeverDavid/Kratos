@@ -116,33 +116,33 @@ namespace Kratos
           return current_time;
       }
 
-      static int ComputeNumberOfNodes(ModelPart& model_part) {
-          int num_nodes = model_part.GetCommunicator().LocalMesh().NumberOfNodes();
-          model_part.GetCommunicator().SumAll(num_nodes); // Compute the sum among the partitions
+      static int ComputeNumberOfNodes(ModelPart& rModelPart) {
+          int num_nodes = rModelPart.GetCommunicator().LocalMesh().NumberOfNodes();
+          rModelPart.GetCommunicator().SumAll(num_nodes); // Compute the sum among the partitions
           return num_nodes;
       }
 
-      static int ComputeNumberOfConditions(ModelPart& model_part) {
-          int num_conditions = model_part.GetCommunicator().LocalMesh().NumberOfConditions();
-          model_part.GetCommunicator().SumAll(num_conditions); // Compute the sum among the partitions
+      static int ComputeNumberOfConditions(ModelPart& rModelPart) {
+          int num_conditions = rModelPart.GetCommunicator().LocalMesh().NumberOfConditions();
+          rModelPart.GetCommunicator().SumAll(num_conditions); // Compute the sum among the partitions
           return num_conditions;
       }
 
-      static double ComputeSearchRadius(ModelPart& model_part_1, ModelPart& model_part_2) {
-          double search_radius = std::max(ComputeSearchRadius(model_part_1),
-                                          ComputeSearchRadius(model_part_2));
+      static double ComputeSearchRadius(ModelPart& rModelPart1, ModelPart& rModelPart2) {
+          double search_radius = std::max(ComputeSearchRadius(rModelPart1),
+                                          ComputeSearchRadius(rModelPart2));
           return search_radius;
       }
 
-      static double ComputeSearchRadius(ModelPart& model_part) {
+      static double ComputeSearchRadius(ModelPart& rModelPart) {
           double search_safety_factor = 1.2;
           double max_element_size = 0.0;
 
-          int num_conditions_global = ComputeNumberOfConditions(model_part);
+          int num_conditions_global = ComputeNumberOfConditions(rModelPart);
 
           if (num_conditions_global > 0) {
               // Loop through each edge of a geometrical entity ONCE
-              for (auto& condition : model_part.GetCommunicator().LocalMesh().Conditions()) {
+              for (auto& condition : rModelPart.GetCommunicator().LocalMesh().Conditions()) {
                   for (std::size_t i = 0; i < (condition.GetGeometry().size() - 1); ++i) {
                       double node_1_x = condition.GetGeometry()[i].X();
                       double node_1_y = condition.GetGeometry()[i].Y();
@@ -167,11 +167,11 @@ namespace Kratos
                         << std::endl;
                         // TODO print name of modelpart too!
               // TODO modify loop such that it loop only once over the nodes
-              for (auto& node_1 : model_part.GetCommunicator().LocalMesh().Nodes()) {
+              for (auto& node_1 : rModelPart.GetCommunicator().LocalMesh().Nodes()) {
                   double node_1_x = node_1.X();
                   double node_1_y = node_1.Y();
                   double node_1_z = node_1.Z();
-                  for (auto& node_2 : model_part.GetCommunicator().LocalMesh().Nodes()) {
+                  for (auto& node_2 : rModelPart.GetCommunicator().LocalMesh().Nodes()) {
                       double node_2_x = node_2.X();
                       double node_2_y = node_2.Y();
                       double node_2_z = node_2.Z();
@@ -185,15 +185,15 @@ namespace Kratos
               }
           }
 
-          model_part.GetCommunicator().MaxAll(max_element_size); // Compute the maximum among the partitions
+          rModelPart.GetCommunicator().MaxAll(max_element_size); // Compute the maximum among the partitions
           return max_element_size * search_safety_factor;
       }
 
-      static double ComputeConservativeFactor(const double num_nodes_origin,
-                                              const double num_nodes_destination) {
+      static double ComputeConservativeFactor(const double NumNodesOrigin,
+                                              const double NumNodesDestination) {
           // num_nodes_* are casted to doubles in order to use the double devision
           // if this function would take ints, then the return value would also be an int!
-          return num_nodes_origin / num_nodes_destination;
+          return NumNodesOrigin / NumNodesDestination;
       }
 
       static bool ProjectPointToLine(Condition* p_condition,
@@ -223,14 +223,15 @@ namespace Kratos
           local_coords[0] = point_projected_local_coords[0];
           local_coords[1] = 0.0;
 
-          /*
+          
           std::cout << "Point to project: [" << global_coords[0] << " " << global_coords[1] << " " << global_coords[2] << "], local points: [" <<
           p_condition->GetGeometry()[0].X() << " " << p_condition->GetGeometry()[0].Y() << " " << p_condition->GetGeometry()[0].Z() << "] ["<<
           p_condition->GetGeometry()[1].X() << " " << p_condition->GetGeometry()[1].Y() << " " << p_condition->GetGeometry()[1].Z() << "] local coord: " <<
           local_coords[0] << std::endl;
-          */
+          
 
-          if (-1.0-MapperUtilities::tol_local_coords < local_coords[0] && local_coords[0] < 1.0+MapperUtilities::tol_local_coords) {
+          if (-1.0-MapperUtilities::tol_local_coords < local_coords[0] && 
+              local_coords[0] < 1.0+MapperUtilities::tol_local_coords) {
               return true;
           } else {
               return false;

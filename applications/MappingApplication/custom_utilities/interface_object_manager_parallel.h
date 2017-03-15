@@ -286,8 +286,7 @@ namespace Kratos
               if (buffer[i] == 1) { // Match
                   if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
                       if (!candidate_manager.candidate_receive_objects.at(comm_partner)[i]) {
-                          KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                                       << "\"ProcessMatchInformation\": interface_obj pointer mismatch"
+                          KRATOS_ERROR << "interface_obj pointer mismatch"
                                        << std::endl;
                       }
                   }
@@ -336,10 +335,10 @@ namespace Kratos
           if (m_receive_objects.count(comm_partner) > 0) {
               interface_objects = m_receive_objects.at(comm_partner);
           }
-
+                  
           for (auto interface_obj : interface_objects) {
               if (options.Is(MapperFlags::INTERPOLATE_VALUES)) {
-                  buffer[i] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i]);
+                  buffer[i] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(comm_partner)[i]);
               } else {
                   buffer[i] = interface_obj->GetObjectValue(variable, options);
               }
@@ -350,8 +349,7 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (buffer_size != i) {
-                  KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                               << "\"FillSendBufferWithValues, double\": size mismatch"
+                  KRATOS_ERROR << "size mismatch"
                                << std::endl;
               }
           }
@@ -368,9 +366,9 @@ namespace Kratos
 
           for (auto interface_obj : interface_objects) {
               if (options.Is(MapperFlags::INTERPOLATE_VALUES)) {
-                  buffer[(i*3) + 0] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i])[0];
-                  buffer[(i*3) + 1] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i])[1];
-                  buffer[(i*3) + 2] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(m_comm_rank)[i])[2];
+                  buffer[(i*3) + 0] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(comm_partner)[i])[0];
+                  buffer[(i*3) + 1] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(comm_partner)[i])[1];
+                  buffer[(i*3) + 2] = interface_obj->GetObjectValueInterpolated(variable, m_shape_functions.at(comm_partner)[i])[2];
               } else {
                   buffer[(i*3) + 0] = interface_obj->GetObjectValue(variable, options)[0];
                   buffer[(i*3) + 1] = interface_obj->GetObjectValue(variable, options)[1];
@@ -383,8 +381,7 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (buffer_size != i*3) {
-                  KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                               << "\"FillSendBufferWithValues, double<3>\": size mismatch"
+                  KRATOS_ERROR << "size mismatch"
                                << std::endl;
               }
           }
@@ -400,9 +397,9 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (static_cast<int>(interface_objects.size()) != buffer_size) {
-                  KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                               << "\"ProcessValues, double\": Wrong number of results "
-                               << "received!; interface_objects.size() = " << interface_objects.size()
+                  KRATOS_ERROR << "Wrong number of results received!; "
+                               << "interface_objects.size() = " 
+                               << interface_objects.size()
                                << ", buffer_size = " << buffer_size << std::endl;
               }
           }
@@ -419,8 +416,7 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (buffer_size % 3 != 0) {
-                  KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                               << "\"ProcessValues, double<3>\": Uneven number of results "
+                  KRATOS_ERROR << "Uneven number of results "
                                << "received!; buffer_size modulo 3 = "
                                << buffer_size % 3 << std::endl;
               }
@@ -435,9 +431,8 @@ namespace Kratos
 
           if (MapperUtilities::MAPPER_DEBUG_LEVEL) {
               if (static_cast<int>(interface_objects.size()) != num_values) {
-                 KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerParallel; "
-                              << "\"ProcessValues, double<3>\": Wrong number of results "
-                              << "received!; interface_objects.size() = "
+                 KRATOS_ERROR << "Wrong number of results received!; "
+                              << "interface_objects.size() = "
                               << interface_objects.size() << ", num_values = "
                               << num_values << std::endl;
               }

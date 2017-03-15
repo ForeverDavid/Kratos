@@ -115,7 +115,7 @@ namespace Kratos
                                                                         projection_local_coords,
                                                                         projection_distance, m_normal);
           } else {
-              KRATOS_ERROR << "MappingApplication; InterfaceCondition; \"EvaluateResult\" Unsupported Geometry!" << std::endl;
+              KRATOS_ERROR << "Unsupported Geometry!" << std::endl;
           }
 
           if (is_inside) {
@@ -145,8 +145,8 @@ namespace Kratos
       // Scalars
       double GetObjectValue(const Variable<double>& variable,
                             const Kratos::Flags& options) override {
-        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
-        //       << "Not accessible for Conditions" << std::endl;
+          KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA))
+              << "Only Non-Historical Variables are accessible for Conditions" << std::endl;
 
           return m_p_condition->GetValue(variable);
       }
@@ -155,9 +155,9 @@ namespace Kratos
                           const double value,
                           const Kratos::Flags& options,
                           const double factor) override {
+          KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA))
+              << "Only Non-Historical Variables are accessible for Conditions" << std::endl;
 
-        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
-        //       << "Not accessible for Conditions" << std::endl;
           if (options.Is(MapperFlags::ADD_VALUES)) {
               double old_value = m_p_condition->GetValue(variable);
               m_p_condition->SetValue(variable, old_value + value * factor);
@@ -169,17 +169,20 @@ namespace Kratos
       double GetObjectValueInterpolated(const Variable<double>& variable,
                                         std::vector<double>& shape_function_values) override {
           double interpolated_value = 0.0f;
+          double shape_fct_value = 0.0f;
           for (int i = 0; i < m_num_points; ++i) {
+              shape_fct_value += shape_function_values[i];
               interpolated_value += m_p_condition->GetGeometry().GetPoint(i).FastGetSolutionStepValue(variable) * shape_function_values[i];
           }
+          std::cout << "Interpolated Value = " << interpolated_value << " ; shape_fct_value = " << shape_fct_value << std::endl;
           return interpolated_value;
       }
 
       // Vectors
       array_1d<double,3> GetObjectValue(const Variable< array_1d<double,3> >& variable,
                                         const Kratos::Flags& options) override {
-        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
-        //       << "Not accessible for Conditions" << std::endl;
+          KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA))
+              << "Only Non-Historical Variables are accessible for Conditions" << std::endl;
           
           return m_p_condition->GetValue(variable);
       }
@@ -188,8 +191,9 @@ namespace Kratos
                           const array_1d<double,3>& value,
                           const Kratos::Flags& options,
                           const double factor) override {
-        //   KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA)
-        //       << "Not accessible for Conditions" << std::endl;
+          KRATOS_ERROR_IF_NOT(options.Is(MapperFlags::NON_HISTORICAL_DATA))
+              << "Only Non-Historical Variables are accessible for Conditions" << std::endl;
+
           if (options.Is(MapperFlags::ADD_VALUES)) {
               array_1d<double,3> old_value = m_p_condition->GetValue(variable);
               m_p_condition->SetValue(variable, old_value + value * factor);

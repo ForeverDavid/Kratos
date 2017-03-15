@@ -107,8 +107,8 @@ namespace Kratos
                const Variable<double>& destination_variable,
                Kratos::Flags& options) override {
           m_p_mapper_communicator->TransferInterpolatedData(origin_variable,
-                                                          destination_variable,
-                                                          options);
+                                                            destination_variable,
+                                                            options);
       }
 
       /* This function maps from Origin to Destination */
@@ -116,8 +116,8 @@ namespace Kratos
                const Variable< array_1d<double,3> >& destination_variable,
                Kratos::Flags& options) override {
           m_p_mapper_communicator->TransferInterpolatedData(origin_variable,
-                                                          destination_variable,
-                                                          options);
+                                                            destination_variable,
+                                                            options);
         }
 
       /* This function maps from Destination to Origin */
@@ -128,8 +128,8 @@ namespace Kratos
           // It is constructed with the order of the model_parts changed!
           if (!m_p_inverse_mapper) {
               m_p_inverse_mapper = Mapper::Pointer( new NearestElementMapper(m_model_part_destination,
-                                                                           m_model_part_origin,
-                                                                           m_json_parameters) );
+                                                                             m_model_part_origin,
+                                                                             m_json_parameters) );
           }
           m_p_inverse_mapper->Map(destination_variable, origin_variable, options);
       }
@@ -142,8 +142,8 @@ namespace Kratos
           // It is constructed with the order of the model_parts changed!
           if (!m_p_inverse_mapper) {
               m_p_inverse_mapper = Mapper::Pointer( new NearestElementMapper(m_model_part_destination,
-                                                                           m_model_part_origin,
-                                                                           m_json_parameters) );
+                                                                             m_model_part_origin,
+                                                                             m_json_parameters) );
           }
           m_p_inverse_mapper->Map(destination_variable, origin_variable, options);
         }

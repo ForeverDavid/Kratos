@@ -153,21 +153,18 @@ namespace Kratos
       }
 
       virtual int GetObjectId() {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"GetObjectId\" "
-                       << "of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
           return -1;
       }
 
       virtual void PrintMatchInfo(const int comm_rank) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"PrintMatchInfo\" "
-                       << "of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual bool EvaluateResult(array_1d<double, 3> global_coords, double& min_distance,
                                   double distance, array_1d<double,2>& local_coords,
                                   std::vector<double>& shape_function_values) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"EvaluateResult\" "
-                       << "of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
           return false;
       }
 
@@ -175,50 +172,41 @@ namespace Kratos
       // Scalars
       virtual double GetObjectValue(const Variable<double>& variable,
                                     const Kratos::Flags& options) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"GetObjectValue, "
-                       << "double\" of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void SetObjectValue(const Variable<double>& variable,
                                   const double value,
                                   const Kratos::Flags& options,
                                   const double factor) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"SetObjectValue, "
-                       << "double\" of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual double GetObjectValueInterpolated(const Variable<double>& variable,
                                                 std::vector<double>& shape_function_values) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; "
-                       << "\"GetObjectValueInterpolated, double\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       // Vectors
       virtual array_1d<double,3> GetObjectValue(const Variable< array_1d<double,3> >& variable,
                                                 const Kratos::Flags& options) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"GetObjectValue, "
-                       << "double<3>\" of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void SetObjectValue(const Variable< array_1d<double,3> >& variable,
                                   const array_1d<double,3>& value,
                                   const Kratos::Flags& options,
                                   const double factor) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"SetObjectValue, "
-                       << "double<3>\" of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual array_1d<double,3> GetObjectValueInterpolated(const Variable< array_1d<double,3> >& variable,
                                                             std::vector<double>& shape_function_values) {
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; "
-                       << "\"GetObjectValueInterpolated, double<3>\" of the base "
-                       << "class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       virtual void WriteCoordinatesToVariable() { 
-          KRATOS_ERROR << "MappingApplication; InterfaceObject; \"WriteCoordinatesToVariable\" "
-                       << "of the base class called!" << std::endl;
+          KRATOS_ERROR << "Base class function called!" << std::endl;
       }
 
       ///@}
