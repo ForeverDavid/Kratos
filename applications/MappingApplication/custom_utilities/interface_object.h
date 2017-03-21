@@ -127,10 +127,6 @@ namespace Kratos
           return m_neighbor_found;
       }
 
-      // double MinDistance() {
-      //     return m_min_distance_neighbor;
-      // }
-
       bool HasNeighborInPartition(const int partition_index) {
           bool return_value = false;
           if (m_neighbor_found) {
@@ -140,13 +136,13 @@ namespace Kratos
           return return_value;
       }
 
-      void SetIsBeingSent() {
-          m_is_being_sent = true;
-      }
+      // void SetIsBeingSent() {
+      //     m_is_being_sent = true;
+      // }
 
-      bool GetIsBeingSent() {
-          return m_is_being_sent;
-      }
+      // bool GetIsBeingSent() {
+      //     return m_is_being_sent;
+      // }
 
       int GetNeighborRank() {
           return m_neighbor_rank;
@@ -293,7 +289,6 @@ namespace Kratos
 
       double m_min_distance_neighbor;
       bool m_neighbor_found;
-      bool m_is_being_sent;
       int m_neighbor_rank;
 
       ///@}
@@ -308,7 +303,6 @@ namespace Kratos
       void SetInitialValuesToMembers() {
           m_min_distance_neighbor = std::numeric_limits<double>::max();
           m_neighbor_found = false;
-          m_is_being_sent = false;
           m_neighbor_rank = 0;
       }
 

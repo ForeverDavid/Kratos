@@ -274,16 +274,16 @@ namespace Kratos
       void InvokeSearch(const double InitialSearchRadius,
                         const int MaxSearchIterations) override {
           mpSearchStructure->Search(InitialSearchRadius,
-                                       MaxSearchIterations);
+                                    MaxSearchIterations);
 
           mpInterfaceObjectManagerDestination->ComputeBufferSizesAndCommunicationGraph(
-                                           mMaxSendBufferSize,
-                                           mMaxReceiveBufferSize,
-                                           mColoredGraph,
-                                           mMaxColors);
-          // if (mEchoLevel > 2) {
+                                                  mMaxSendBufferSize,
+                                                  mMaxReceiveBufferSize,
+                                                  mColoredGraph,
+                                                  mMaxColors);
+          if (mEchoLevel > 2) {
               PrintPairs();
-          // }  
+          }  
       }
 
       template <typename T>

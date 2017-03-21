@@ -387,7 +387,7 @@ namespace Kratos
           m_comm_rank = i_comm_rank;
           m_comm_size = i_comm_size;
 
-          m_echo_level = i_echo_level;
+          mEchoLevel = i_echo_level;
 
           if (i_interface_object_type == MapperUtilities::Node) {
               InitializeInterfaceNodeManager(i_model_part, i_comm_rank, i_comm_size);
@@ -398,6 +398,10 @@ namespace Kratos
               KRATOS_ERROR << "MappingApplication; InterfaceObjectManagerBase; \"CreateInterfaceObjectManager\" "
                            << "type of interface object construction not implemented" << std::endl;
           }
+
+          if (mEchoLevel > 2) {
+              PrintInterfaceObjects();
+          }
       }
 
       ModelPart& m_model_part;
@@ -406,7 +410,7 @@ namespace Kratos
 
       int m_comm_rank = 0;
       int m_comm_size = 0;
-      int m_echo_level = 0;
+      int mEchoLevel = 0;
 
       // point-sending interface (destination)
       std::unordered_map<int, std::vector<InterfaceObject::Pointer> > m_send_objects;
@@ -519,6 +523,15 @@ namespace Kratos
                       m_interface_objects.push_back(InterfaceObject::Pointer( new InterfaceCondition(condition, gauss_point_global_coords) ));
                   }
               }
+          }
+      }
+
+      void PrintInterfaceObjects() {
+          for (auto& r_interface_obj : m_interface_objects) {
+              std::cout << "Rank " << m_comm_rank << " , Interface Object " << " [ "
+                        << r_interface_obj->X() << " "
+                        << r_interface_obj->Y() << " "
+                        << r_interface_obj->Z() << "]" << std::endl;
           }
       }
 

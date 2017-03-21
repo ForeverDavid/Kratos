@@ -174,7 +174,7 @@ namespace Kratos
               shape_fct_value += shape_function_values[i];
               interpolated_value += m_p_condition->GetGeometry().GetPoint(i).FastGetSolutionStepValue(variable) * shape_function_values[i];
           }
-          std::cout << "Interpolated Value = " << interpolated_value << " ; shape_fct_value = " << shape_fct_value << std::endl;
+          // std::cout << "Interpolated Value = " << interpolated_value << " ; shape_fct_value = " << shape_fct_value << std::endl;
           return interpolated_value;
       }
 

@@ -209,13 +209,23 @@ namespace Kratos
       static void ComputeLocalBoundingBox(ModelPart& rModelPart,
                                           double* pLocalBoundingBox) {
           // xmax, xmin,  ymax, ymin,  zmax, zmin
-          for (auto &node : rModelPart.GetCommunicator().LocalMesh().Nodes()) { // loop over local nodes
-              pLocalBoundingBox[0] = std::max(node.X(), pLocalBoundingBox[0]);
-              pLocalBoundingBox[1] = std::min(node.X(), pLocalBoundingBox[1]);
-              pLocalBoundingBox[2] = std::max(node.Y(), pLocalBoundingBox[2]);
-              pLocalBoundingBox[3] = std::min(node.Y(), pLocalBoundingBox[3]);
-              pLocalBoundingBox[4] = std::max(node.Z(), pLocalBoundingBox[4]);
-              pLocalBoundingBox[5] = std::min(node.Z(), pLocalBoundingBox[5]);
+          // loop over local nodes
+          for (auto &r_node : rModelPart.GetCommunicator().LocalMesh().Nodes()) { 
+              pLocalBoundingBox[0] = std::max(r_node.X(), pLocalBoundingBox[0]);
+              pLocalBoundingBox[1] = std::min(r_node.X(), pLocalBoundingBox[1]);
+              pLocalBoundingBox[2] = std::max(r_node.Y(), pLocalBoundingBox[2]);
+              pLocalBoundingBox[3] = std::min(r_node.Y(), pLocalBoundingBox[3]);
+              pLocalBoundingBox[4] = std::max(r_node.Z(), pLocalBoundingBox[4]);
+              pLocalBoundingBox[5] = std::min(r_node.Z(), pLocalBoundingBox[5]);
+          }
+          // loop over ghost nodes (necessary if conditions have only ghost nodes)
+          for (auto &r_node : rModelPart.GetCommunicator().GhostMesh().Nodes()) { 
+              pLocalBoundingBox[0] = std::max(r_node.X(), pLocalBoundingBox[0]);
+              pLocalBoundingBox[1] = std::min(r_node.X(), pLocalBoundingBox[1]);
+              pLocalBoundingBox[2] = std::max(r_node.Y(), pLocalBoundingBox[2]);
+              pLocalBoundingBox[3] = std::min(r_node.Y(), pLocalBoundingBox[3]);
+              pLocalBoundingBox[4] = std::max(r_node.Z(), pLocalBoundingBox[4]);
+              pLocalBoundingBox[5] = std::min(r_node.Z(), pLocalBoundingBox[5]);
           }
       }
 

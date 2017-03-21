@@ -9,6 +9,7 @@ import KratosMultiphysics.KratosUnittest as KratosUnittest
 from generalTests import KratosMappingGeneralTests
 
 from SmallTests import NearestNeighborTest_1 as TNearestNeighborTest_1
+from SmallTests import NearestElementTest2D_1 as TNearestElementTest2D_1
 
 
 def AssambleTestSuites():
@@ -31,6 +32,7 @@ def AssambleTestSuites():
     # - testSmallExample
     smallSuite = suites['small']
     smallSuite.addTest(TNearestNeighborTest_1('test_execution'))
+    smallSuite.addTest(TNearestElementTest2D_1('test_execution'))
 
     # Create a test suit with the selected tests
     # nightSuite will contain the following tests:
@@ -47,7 +49,8 @@ def AssambleTestSuites():
     allSuite = suites['all']
     allSuite.addTests(
         KratosUnittest.TestLoader().loadTestsFromTestCases([
-            TNearestNeighborTest_1
+            TNearestNeighborTest_1,
+            TNearestElementTest2D_1
         ])
     )
 
