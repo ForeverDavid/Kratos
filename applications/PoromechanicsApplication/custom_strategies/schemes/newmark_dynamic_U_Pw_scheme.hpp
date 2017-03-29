@@ -111,7 +111,7 @@ public:
         const int NNodes = static_cast<int>(r_model_part.Nodes().size());
         ModelPart::NodesContainerType::iterator node_begin = r_model_part.NodesBegin();
         
-        #pragma omp parallel for private(DeltaDisplacement,DeltaPressure)
+        // #pragma omp parallel for private(DeltaDisplacement,DeltaPressure)
         for(int i = 0; i < NNodes; i++)
         {
             ModelPart::NodesContainerType::iterator itNode = node_begin + i;

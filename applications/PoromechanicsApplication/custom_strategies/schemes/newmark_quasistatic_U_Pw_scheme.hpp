@@ -145,7 +145,7 @@ public:
         int NElems = static_cast<int>(r_model_part.Elements().size());
         ModelPart::ElementsContainerType::iterator el_begin = r_model_part.ElementsBegin();
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NElems; i++)
         {
             ModelPart::ElementsContainerType::iterator itElem = el_begin + i;
@@ -155,7 +155,7 @@ public:
         int NCons = static_cast<int>(r_model_part.Conditions().size());
         ModelPart::ConditionsContainerType::iterator con_begin = r_model_part.ConditionsBegin();
         
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NCons; i++)
         {
             ModelPart::ConditionsContainerType::iterator itCond = con_begin + i;
@@ -192,7 +192,7 @@ public:
         int NElems = static_cast<int>(r_model_part.Elements().size());
         ModelPart::ElementsContainerType::iterator el_begin = r_model_part.ElementsBegin();
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NElems; i++)
         {
             ModelPart::ElementsContainerType::iterator itElem = el_begin + i;
@@ -202,7 +202,7 @@ public:
         int NCons = static_cast<int>(r_model_part.Conditions().size());
         ModelPart::ConditionsContainerType::iterator con_begin = r_model_part.ConditionsBegin();
         
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NCons; i++)
         {
             ModelPart::ConditionsContainerType::iterator itCond = con_begin + i;
@@ -227,7 +227,7 @@ public:
         int NElems = static_cast<int>(r_model_part.Elements().size());
         ModelPart::ElementsContainerType::iterator el_begin = r_model_part.ElementsBegin();
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NElems; i++)
         {
             ModelPart::ElementsContainerType::iterator itElem = el_begin + i;
@@ -237,7 +237,7 @@ public:
         int NCons = static_cast<int>(r_model_part.Conditions().size());
         ModelPart::ConditionsContainerType::iterator con_begin = r_model_part.ConditionsBegin();
         
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NCons; i++)
         {
             ModelPart::ConditionsContainerType::iterator itCond = con_begin + i;
@@ -373,23 +373,18 @@ public:
         TSystemVectorType& b)
     {
         KRATOS_TRY
-        
-        int NumThreads = OpenMPUtils::GetNumThreads();
-        OpenMPUtils::PartitionVector DofSetPartition;
-        OpenMPUtils::DivideInPartitions(rDofSet.size(), NumThreads, DofSetPartition);
 
-        #pragma omp parallel
+        const int ndof = static_cast<int>(rDofSet.size());
+        typename DofsArrayType::iterator DofBegin = rDofSet.begin();
+
+        // #pragma omp parallel for firstprivate(DofBegin)
+        for(int i = 0;  i < ndof; i++)
         {
-            int k = OpenMPUtils::ThisThread();
+            typename DofsArrayType::iterator itDof = DofBegin + i;
 
-            typename DofsArrayType::iterator DofsBegin = rDofSet.begin() + DofSetPartition[k];
-            typename DofsArrayType::iterator DofsEnd = rDofSet.begin() + DofSetPartition[k+1];
-            
-            //Update Displacement and Pressure (DOFs)
-            for (typename DofsArrayType::iterator itDof = DofsBegin; itDof != DofsEnd; ++itDof)
+            if (itDof->IsFree() )
             {
-                if (itDof->IsFree())
-                    itDof->GetSolutionStepValue() += TSparseSpace::GetValue(Dx, itDof->EquationId());
+                itDof->GetSolutionStepValue() += TSparseSpace::GetValue(Dx,itDof->EquationId());
             }
         }
         
@@ -423,7 +418,7 @@ protected:
         const int NNodes = static_cast<int>(r_model_part.Nodes().size());
         ModelPart::NodesContainerType::iterator node_begin = r_model_part.NodesBegin();
         
-        #pragma omp parallel for private(DeltaDisplacement,DeltaPressure)
+        // #pragma omp parallel for private(DeltaDisplacement,DeltaPressure)
         for(int i = 0; i < NNodes; i++)
         {
             ModelPart::NodesContainerType::iterator itNode = node_begin + i;

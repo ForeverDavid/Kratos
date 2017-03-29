@@ -250,26 +250,26 @@ protected:
     {
         double ReferenceDofsNorm = 0.0;
 
-        int NumThreads = OpenMPUtils::GetNumThreads();
-        OpenMPUtils::PartitionVector DofSetPartition;
-        OpenMPUtils::DivideInPartitions(rDofSet.size(), NumThreads, DofSetPartition);
+        // int NumThreads = OpenMPUtils::GetNumThreads();
+        // OpenMPUtils::PartitionVector DofSetPartition;
+        // OpenMPUtils::DivideInPartitions(rDofSet.size(), NumThreads, DofSetPartition);
 
-        #pragma omp parallel reduction(+:ReferenceDofsNorm)
-        {
-            int k = OpenMPUtils::ThisThread();
+        // #pragma omp parallel reduction(+:ReferenceDofsNorm)
+        // {
+        //     int k = OpenMPUtils::ThisThread();
 
-            typename DofsArrayType::iterator DofsBegin = rDofSet.begin() + DofSetPartition[k];
-            typename DofsArrayType::iterator DofsEnd = rDofSet.begin() + DofSetPartition[k+1];
+        //     typename DofsArrayType::iterator DofsBegin = rDofSet.begin() + DofSetPartition[k];
+        //     typename DofsArrayType::iterator DofsEnd = rDofSet.begin() + DofSetPartition[k+1];
             
-            for (typename DofsArrayType::iterator itDof = DofsBegin; itDof != DofsEnd; ++itDof)
-            {                    
-                if (itDof->IsFree())
-                {
-                    const double& temp = itDof->GetSolutionStepValue();
-                    ReferenceDofsNorm += temp*temp;
-                }
-            }
-        }
+        //     for (typename DofsArrayType::iterator itDof = DofsBegin; itDof != DofsEnd; ++itDof)
+        //     {                    
+        //         if (itDof->IsFree())
+        //         {
+        //             const double& temp = itDof->GetSolutionStepValue();
+        //             ReferenceDofsNorm += temp*temp;
+        //         }
+        //     }
+        // }
                 
         return sqrt(ReferenceDofsNorm);
     }
@@ -280,118 +280,118 @@ private:
 
     void SetLoadsToZero()
     {
-        for(unsigned int i = 0; i < mVariableNames.size(); i++)
-        {
-            ModelPart& rSubModelPart = *(mSubModelPartList[i]);
-            const std::string& VariableName = mVariableNames[i];
+        // for(unsigned int i = 0; i < mVariableNames.size(); i++)
+        // {
+        //     ModelPart& rSubModelPart = *(mSubModelPartList[i]);
+        //     const std::string& VariableName = mVariableNames[i];
             
-            if( KratosComponents< Variable<double> >::Has( VariableName ) )
-            {
-                Variable<double> var = KratosComponents< Variable<double> >::Get( VariableName );
+        //     if( KratosComponents< Variable<double> >::Has( VariableName ) )
+        //     {
+        //         Variable<double> var = KratosComponents< Variable<double> >::Get( VariableName );
                 
-                #pragma omp parallel
-                {
-                    ModelPart::NodeIterator NodesBegin;
-                    ModelPart::NodeIterator NodesEnd;
-                    OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
+        //         #pragma omp parallel
+        //         {
+        //             ModelPart::NodeIterator NodesBegin;
+        //             ModelPart::NodeIterator NodesEnd;
+        //             OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
                     
-                    for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
-                    {
-                        double& rvalue = itNode->FastGetSolutionStepValue(var);
-                        itNode->FastGetSolutionStepValue(var,1) = rvalue;
-                        rvalue = 0.0;
-                    }
-                }
-            }
-            else if( KratosComponents< Variable<array_1d<double,3> > >::Has(VariableName) )
-            {
-                typedef VariableComponent< VectorComponentAdaptor<array_1d<double, 3> > > component_type;
-                component_type varx = KratosComponents< component_type >::Get(VariableName+std::string("_X"));
-                component_type vary = KratosComponents< component_type >::Get(VariableName+std::string("_Y"));
-                component_type varz = KratosComponents< component_type >::Get(VariableName+std::string("_Z"));
+        //             for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
+        //             {
+        //                 double& rvalue = itNode->FastGetSolutionStepValue(var);
+        //                 itNode->FastGetSolutionStepValue(var,1) = rvalue;
+        //                 rvalue = 0.0;
+        //             }
+        //         }
+        //     }
+        //     else if( KratosComponents< Variable<array_1d<double,3> > >::Has(VariableName) )
+        //     {
+        //         typedef VariableComponent< VectorComponentAdaptor<array_1d<double, 3> > > component_type;
+        //         component_type varx = KratosComponents< component_type >::Get(VariableName+std::string("_X"));
+        //         component_type vary = KratosComponents< component_type >::Get(VariableName+std::string("_Y"));
+        //         component_type varz = KratosComponents< component_type >::Get(VariableName+std::string("_Z"));
                 
-                #pragma omp parallel
-                {
-                    ModelPart::NodeIterator NodesBegin;
-                    ModelPart::NodeIterator NodesEnd;
-                    OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
+        //         #pragma omp parallel
+        //         {
+        //             ModelPart::NodeIterator NodesBegin;
+        //             ModelPart::NodeIterator NodesEnd;
+        //             OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
                     
-                    for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
-                    {
-                        double& rvaluex = itNode->FastGetSolutionStepValue(varx);
-                        itNode->FastGetSolutionStepValue(varx,1) = rvaluex;
-                        rvaluex = 0.0;
+        //             for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
+        //             {
+        //                 double& rvaluex = itNode->FastGetSolutionStepValue(varx);
+        //                 itNode->FastGetSolutionStepValue(varx,1) = rvaluex;
+        //                 rvaluex = 0.0;
 
-                        double& rvaluey = itNode->FastGetSolutionStepValue(vary);
-                        itNode->FastGetSolutionStepValue(vary,1) = rvaluey;
-                        rvaluey = 0.0;
+        //                 double& rvaluey = itNode->FastGetSolutionStepValue(vary);
+        //                 itNode->FastGetSolutionStepValue(vary,1) = rvaluey;
+        //                 rvaluey = 0.0;
                         
-                        double& rvaluez = itNode->FastGetSolutionStepValue(varz);
-                        itNode->FastGetSolutionStepValue(varz,1) = rvaluez;
-                        rvaluez = 0.0;
-                    }
-                }
-            }
-            else
-            {
-                KRATOS_THROW_ERROR( std::logic_error, "One variable of the applied loads has a non supported type. Variable: ", VariableName )
-            }
-        }
+        //                 double& rvaluez = itNode->FastGetSolutionStepValue(varz);
+        //                 itNode->FastGetSolutionStepValue(varz,1) = rvaluez;
+        //                 rvaluez = 0.0;
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         KRATOS_THROW_ERROR( std::logic_error, "One variable of the applied loads has a non supported type. Variable: ", VariableName )
+        //     }
+        // }
     }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     void RestoreLoadsValue()
     {
-        for(unsigned int i = 0; i < mVariableNames.size(); i++)
-        {
-            ModelPart& rSubModelPart = *(mSubModelPartList[i]);
-            const std::string& VariableName = mVariableNames[i];
+        // for(unsigned int i = 0; i < mVariableNames.size(); i++)
+        // {
+        //     ModelPart& rSubModelPart = *(mSubModelPartList[i]);
+        //     const std::string& VariableName = mVariableNames[i];
             
-            if( KratosComponents< Variable<double> >::Has( VariableName ) )
-            {
-                Variable<double> var = KratosComponents< Variable<double> >::Get( VariableName );
+        //     if( KratosComponents< Variable<double> >::Has( VariableName ) )
+        //     {
+        //         Variable<double> var = KratosComponents< Variable<double> >::Get( VariableName );
                 
-                #pragma omp parallel
-                {
-                    ModelPart::NodeIterator NodesBegin;
-                    ModelPart::NodeIterator NodesEnd;
-                    OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
+        //         #pragma omp parallel
+        //         {
+        //             ModelPart::NodeIterator NodesBegin;
+        //             ModelPart::NodeIterator NodesEnd;
+        //             OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
                     
-                    for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
-                    {
-                        itNode->FastGetSolutionStepValue(var) = itNode->FastGetSolutionStepValue(var,1);
-                    }
-                }
-            }
-            else if( KratosComponents< Variable<array_1d<double,3> > >::Has(VariableName) )
-            {
-                typedef VariableComponent< VectorComponentAdaptor<array_1d<double, 3> > > component_type;
-                component_type varx = KratosComponents< component_type >::Get(VariableName+std::string("_X"));
-                component_type vary = KratosComponents< component_type >::Get(VariableName+std::string("_Y"));
-                component_type varz = KratosComponents< component_type >::Get(VariableName+std::string("_Z"));
+        //             for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
+        //             {
+        //                 itNode->FastGetSolutionStepValue(var) = itNode->FastGetSolutionStepValue(var,1);
+        //             }
+        //         }
+        //     }
+        //     else if( KratosComponents< Variable<array_1d<double,3> > >::Has(VariableName) )
+        //     {
+        //         typedef VariableComponent< VectorComponentAdaptor<array_1d<double, 3> > > component_type;
+        //         component_type varx = KratosComponents< component_type >::Get(VariableName+std::string("_X"));
+        //         component_type vary = KratosComponents< component_type >::Get(VariableName+std::string("_Y"));
+        //         component_type varz = KratosComponents< component_type >::Get(VariableName+std::string("_Z"));
                 
-                #pragma omp parallel
-                {
-                    ModelPart::NodeIterator NodesBegin;
-                    ModelPart::NodeIterator NodesEnd;
-                    OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
+        //         #pragma omp parallel
+        //         {
+        //             ModelPart::NodeIterator NodesBegin;
+        //             ModelPart::NodeIterator NodesEnd;
+        //             OpenMPUtils::PartitionedIterators(rSubModelPart.Nodes(),NodesBegin,NodesEnd);
                     
-                    for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
-                    {
-                        itNode->FastGetSolutionStepValue(varx) = itNode->FastGetSolutionStepValue(varx,1);
+        //             for (ModelPart::NodeIterator itNode = NodesBegin; itNode != NodesEnd; ++itNode)
+        //             {
+        //                 itNode->FastGetSolutionStepValue(varx) = itNode->FastGetSolutionStepValue(varx,1);
                         
-                        itNode->FastGetSolutionStepValue(vary) = itNode->FastGetSolutionStepValue(vary,1);
+        //                 itNode->FastGetSolutionStepValue(vary) = itNode->FastGetSolutionStepValue(vary,1);
                         
-                        itNode->FastGetSolutionStepValue(varz) = itNode->FastGetSolutionStepValue(varz,1);
-                    }
-                }
-            }
-            else
-            {
-                KRATOS_THROW_ERROR( std::logic_error, "One variable of the applied loads has a non supported type. Variable: ", VariableName )
-            }
-        }
+        //                 itNode->FastGetSolutionStepValue(varz) = itNode->FastGetSolutionStepValue(varz,1);
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         KRATOS_THROW_ERROR( std::logic_error, "One variable of the applied loads has a non supported type. Variable: ", VariableName )
+        //     }
+        // }
     }
 
 }; // Class PoromechanicsNewtonRaphsonStrategy

@@ -288,7 +288,7 @@ protected:
         double WeightingFunctionDenominator = 0.0;
         int NNeighbours = TipNeighbours.size();
 
-        #pragma omp parallel for reduction(+:NonlocalDamage,WeightingFunctionDenominator)
+        // #pragma omp parallel for reduction(+:NonlocalDamage,WeightingFunctionDenominator)
         for(int i = 0; i < NNeighbours; i++)
         {
             const FracturePoint& MyPoint = *(TipNeighbours[i]);
@@ -629,313 +629,313 @@ protected:
         ModelPart& rModelPartOld,
         ModelPart& rModelPartNew)
     {
-        // Define ElementOld Cell matrix
-        std::vector< std::vector< std::vector< std::vector<Element::Pointer> > > > ElementOldCellMatrix;
-        ElementOldCellMatrix.resize(AuxVariables.NRows);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-            ElementOldCellMatrix[i].resize(AuxVariables.NColumns);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-        {
-            for(int j = 0; j < AuxVariables.NColumns; j++)
-            {
-                ElementOldCellMatrix[i][j].resize(AuxVariables.NSections);
-            }
-        }
+        // // Define ElementOld Cell matrix
+        // std::vector< std::vector< std::vector< std::vector<Element::Pointer> > > > ElementOldCellMatrix;
+        // ElementOldCellMatrix.resize(AuxVariables.NRows);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        //     ElementOldCellMatrix[i].resize(AuxVariables.NColumns);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        // {
+        //     for(int j = 0; j < AuxVariables.NColumns; j++)
+        //     {
+        //         ElementOldCellMatrix[i][j].resize(AuxVariables.NSections);
+        //     }
+        // }
 
-        // Locate Old Elments in cells
-        double X_me;
-        double Y_me;
-        double Z_me;
-        int PointsNumber;
+        // // Locate Old Elments in cells
+        // double X_me;
+        // double Y_me;
+        // double Z_me;
+        // int PointsNumber;
 
-        unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
+        // unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
 
-        // Loop through all BodySubModelParts
-        for(unsigned int m = 0; m < NumBodySubModelParts; m++)
-        {
-            ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][m].GetString());
+        // // Loop through all BodySubModelParts
+        // for(unsigned int m = 0; m < NumBodySubModelParts; m++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][m].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber)
-            for(int i = 0; i < NElems; i++)
-            {
-                ModelPart::ElementsContainerType::iterator itElemOld = el_begin + i;
+        //     #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber)
+        //     for(int i = 0; i < NElems; i++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElemOld = el_begin + i;
 
-                double X_left = itElemOld->GetGeometry().GetPoint(0).X0();
-                double X_right = X_left;
-                double Y_top = itElemOld->GetGeometry().GetPoint(0).Y0();
-                double Y_bot = Y_top;
-                double Z_back = itElemOld->GetGeometry().GetPoint(0).Z0();
-                double Z_front = Z_back;
-                PointsNumber = itElemOld->GetGeometry().PointsNumber();
+        //         double X_left = itElemOld->GetGeometry().GetPoint(0).X0();
+        //         double X_right = X_left;
+        //         double Y_top = itElemOld->GetGeometry().GetPoint(0).Y0();
+        //         double Y_bot = Y_top;
+        //         double Z_back = itElemOld->GetGeometry().GetPoint(0).Z0();
+        //         double Z_front = Z_back;
+        //         PointsNumber = itElemOld->GetGeometry().PointsNumber();
 
-                for(int j = 1; j < PointsNumber; j++)
-                {
-                    X_me = itElemOld->GetGeometry().GetPoint(j).X0();
-                    Y_me = itElemOld->GetGeometry().GetPoint(j).Y0();
-                    Z_me = itElemOld->GetGeometry().GetPoint(j).Z0();
+        //         for(int j = 1; j < PointsNumber; j++)
+        //         {
+        //             X_me = itElemOld->GetGeometry().GetPoint(j).X0();
+        //             Y_me = itElemOld->GetGeometry().GetPoint(j).Y0();
+        //             Z_me = itElemOld->GetGeometry().GetPoint(j).Z0();
 
-                    if(X_me > X_right) X_right = X_me;
-                    else if(X_me < X_left) X_left = X_me;
-                    if(Y_me > Y_top) Y_top = Y_me;
-                    else if(Y_me < Y_bot) Y_bot = Y_me;
-                    if(Z_me > Z_front) Z_front = Z_me;
-                    else if(Z_me < Z_back) Z_back = Z_me;
-                }
+        //             if(X_me > X_right) X_right = X_me;
+        //             else if(X_me < X_left) X_left = X_me;
+        //             if(Y_me > Y_top) Y_top = Y_me;
+        //             else if(Y_me < Y_bot) Y_bot = Y_me;
+        //             if(Z_me > Z_front) Z_front = Z_me;
+        //             else if(Z_me < Z_back) Z_back = Z_me;
+        //         }
 
-                int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
-                int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
-                int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //         int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //         int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //         int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
+        //         int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
+        //         int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //         int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
 
-                if(Column_left < 0) Column_left = 0;
-                else if(Column_left >= AuxVariables.NColumns) Column_left = AuxVariables.NColumns-1;
-                if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
-                else if(Column_right < 0) Column_right = 0;
-                if(Row_top < 0) Row_top = 0;
-                else if(Row_top >= AuxVariables.NRows) Row_top = AuxVariables.NRows-1;
-                if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
-                else if(Row_bot < 0) Row_bot = 0;        
-                if(Section_back < 0) Section_back = 0;
-                else if(Section_back >= AuxVariables.NSections) Section_back = AuxVariables.NSections-1;
-                if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
-                else if(Section_front < 0) Section_front = 0;
+        //         if(Column_left < 0) Column_left = 0;
+        //         else if(Column_left >= AuxVariables.NColumns) Column_left = AuxVariables.NColumns-1;
+        //         if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
+        //         else if(Column_right < 0) Column_right = 0;
+        //         if(Row_top < 0) Row_top = 0;
+        //         else if(Row_top >= AuxVariables.NRows) Row_top = AuxVariables.NRows-1;
+        //         if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
+        //         else if(Row_bot < 0) Row_bot = 0;        
+        //         if(Section_back < 0) Section_back = 0;
+        //         else if(Section_back >= AuxVariables.NSections) Section_back = AuxVariables.NSections-1;
+        //         if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
+        //         else if(Section_front < 0) Section_front = 0;
 
-                for(int s = Section_back; s <= Section_front; s++)
-                {
-                    for(int k = Row_top; k <= Row_bot; k++)
-                    {
-                        for(int l = Column_left; l <= Column_right; l++)
-                        {
-                            #pragma omp critical
-                            {
-                                ElementOldCellMatrix[k][l][s].push_back((*(itElemOld.base())));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //         for(int s = Section_back; s <= Section_front; s++)
+        //         {
+        //             for(int k = Row_top; k <= Row_bot; k++)
+        //             {
+        //                 for(int l = Column_left; l <= Column_right; l++)
+        //                 {
+        //                     #pragma omp critical
+        //                     {
+        //                         ElementOldCellMatrix[k][l][s].push_back((*(itElemOld.base())));
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        unsigned int NumInterfaceSubModelPartsOld = rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"].size();
+        // unsigned int NumInterfaceSubModelPartsOld = rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"].size();
 
-        // Loop through all InterfaceSubModelParts
-        for(unsigned int m = 0; m < NumInterfaceSubModelPartsOld; m++)
-        {
-            ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"][m].GetString());
+        // // Loop through all InterfaceSubModelParts
+        // for(unsigned int m = 0; m < NumInterfaceSubModelPartsOld; m++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"][m].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber)
-            for(int i = 0; i < NElems; i++)
-            {
-                ModelPart::ElementsContainerType::iterator itElemOld = el_begin + i;
+        //     #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber)
+        //     for(int i = 0; i < NElems; i++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElemOld = el_begin + i;
 
-                double X_left = itElemOld->GetGeometry().GetPoint(0).X0();
-                double X_right = X_left;
-                double Y_top = itElemOld->GetGeometry().GetPoint(0).Y0();
-                double Y_bot = Y_top;
-                double Z_back = itElemOld->GetGeometry().GetPoint(0).Z0();
-                double Z_front = Z_back;
-                PointsNumber = itElemOld->GetGeometry().PointsNumber();
+        //         double X_left = itElemOld->GetGeometry().GetPoint(0).X0();
+        //         double X_right = X_left;
+        //         double Y_top = itElemOld->GetGeometry().GetPoint(0).Y0();
+        //         double Y_bot = Y_top;
+        //         double Z_back = itElemOld->GetGeometry().GetPoint(0).Z0();
+        //         double Z_front = Z_back;
+        //         PointsNumber = itElemOld->GetGeometry().PointsNumber();
 
-                for(int j = 1; j < PointsNumber; j++)
-                {
-                    X_me = itElemOld->GetGeometry().GetPoint(j).X0();
-                    Y_me = itElemOld->GetGeometry().GetPoint(j).Y0();
-                    Z_me = itElemOld->GetGeometry().GetPoint(j).Z0();
+        //         for(int j = 1; j < PointsNumber; j++)
+        //         {
+        //             X_me = itElemOld->GetGeometry().GetPoint(j).X0();
+        //             Y_me = itElemOld->GetGeometry().GetPoint(j).Y0();
+        //             Z_me = itElemOld->GetGeometry().GetPoint(j).Z0();
                     
-                    if(X_me > X_right) X_right = X_me;
-                    else if(X_me < X_left) X_left = X_me;
-                    if(Y_me > Y_top) Y_top = Y_me;
-                    else if(Y_me < Y_bot) Y_bot = Y_me;
-                    if(Z_me > Z_front) Z_front = Z_me;
-                    else if(Z_me < Z_back) Z_back = Z_me;
-                }
+        //             if(X_me > X_right) X_right = X_me;
+        //             else if(X_me < X_left) X_left = X_me;
+        //             if(Y_me > Y_top) Y_top = Y_me;
+        //             else if(Y_me < Y_bot) Y_bot = Y_me;
+        //             if(Z_me > Z_front) Z_front = Z_me;
+        //             else if(Z_me < Z_back) Z_back = Z_me;
+        //         }
 
-                int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
-                int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
-                int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //         int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //         int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //         int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
+        //         int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
+        //         int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //         int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
                 
-                if(Column_left < 0) Column_left = 0;
-                else if(Column_left >= AuxVariables.NColumns) Column_left = AuxVariables.NColumns-1;
-                if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
-                else if(Column_right < 0) Column_right = 0;
-                if(Row_top < 0) Row_top = 0;
-                else if(Row_top >= AuxVariables.NRows) Row_top = AuxVariables.NRows-1;
-                if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
-                else if(Row_bot < 0) Row_bot = 0;
-                if(Section_back < 0) Section_back = 0;
-                else if(Section_back >= AuxVariables.NSections) Section_back = AuxVariables.NSections-1;
-                if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
-                else if(Section_front < 0) Section_front = 0;
+        //         if(Column_left < 0) Column_left = 0;
+        //         else if(Column_left >= AuxVariables.NColumns) Column_left = AuxVariables.NColumns-1;
+        //         if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
+        //         else if(Column_right < 0) Column_right = 0;
+        //         if(Row_top < 0) Row_top = 0;
+        //         else if(Row_top >= AuxVariables.NRows) Row_top = AuxVariables.NRows-1;
+        //         if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
+        //         else if(Row_bot < 0) Row_bot = 0;
+        //         if(Section_back < 0) Section_back = 0;
+        //         else if(Section_back >= AuxVariables.NSections) Section_back = AuxVariables.NSections-1;
+        //         if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
+        //         else if(Section_front < 0) Section_front = 0;
 
-                for(int s = Section_back; s <= Section_front; s++)
-                {
-                    for(int k = Row_top; k <= Row_bot; k++)
-                    {
-                        for(int l = Column_left; l <= Column_right; l++)
-                        {
-                            #pragma omp critical
-                            {
-                                ElementOldCellMatrix[k][l][s].push_back((*(itElemOld.base())));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //         for(int s = Section_back; s <= Section_front; s++)
+        //         {
+        //             for(int k = Row_top; k <= Row_bot; k++)
+        //             {
+        //                 for(int l = Column_left; l <= Column_right; l++)
+        //                 {
+        //                     #pragma omp critical
+        //                     {
+        //                         ElementOldCellMatrix[k][l][s].push_back((*(itElemOld.base())));
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        // Locate new nodes inside old elements and interpolate nodal variables
-        const int NNodes = static_cast<int>(rModelPartNew.Nodes().size());
-        ModelPart::NodesContainerType::iterator node_begin = rModelPartNew.NodesBegin();
+        // // Locate new nodes inside old elements and interpolate nodal variables
+        // const int NNodes = static_cast<int>(rModelPartNew.Nodes().size());
+        // ModelPart::NodesContainerType::iterator node_begin = rModelPartNew.NodesBegin();
 
-        array_1d<double,3> GlobalCoordinates;
-        array_1d<double,3> LocalCoordinates;
+        // array_1d<double,3> GlobalCoordinates;
+        // array_1d<double,3> LocalCoordinates;
 
-        #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber,GlobalCoordinates,LocalCoordinates)
-        for(int i = 0; i < NNodes; i++)
-        {
-            ModelPart::NodesContainerType::iterator itNodeNew = node_begin + i;
+        // #pragma omp parallel for private(X_me,Y_me,Z_me,PointsNumber,GlobalCoordinates,LocalCoordinates)
+        // for(int i = 0; i < NNodes; i++)
+        // {
+        //     ModelPart::NodesContainerType::iterator itNodeNew = node_begin + i;
 
-            X_me = itNodeNew->X0();
-            Y_me = itNodeNew->Y0();
-            Z_me = itNodeNew->Z0();
+        //     X_me = itNodeNew->X0();
+        //     Y_me = itNodeNew->Y0();
+        //     Z_me = itNodeNew->Z0();
 
-            int Column = int((X_me-AuxVariables.X_min)/AuxVariables.ColumnSize);
-            int Row = int((AuxVariables.Y_max-Y_me)/AuxVariables.RowSize);
-            int Section = int((Z_me-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //     int Column = int((X_me-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //     int Row = int((AuxVariables.Y_max-Y_me)/AuxVariables.RowSize);
+        //     int Section = int((Z_me-AuxVariables.Z_min)/AuxVariables.SectionSize);
 
-            if(Column >= AuxVariables.NColumns) Column = AuxVariables.NColumns-1;
-            else if(Column < 0) Column = 0;
-            if(Row >= AuxVariables.NRows) Row = AuxVariables.NRows-1;
-            else if(Row < 0) Row = 0;
-            if(Section >= AuxVariables.NSections) Section = AuxVariables.NSections-1;
-            else if(Section < 0) Section = 0;
+        //     if(Column >= AuxVariables.NColumns) Column = AuxVariables.NColumns-1;
+        //     else if(Column < 0) Column = 0;
+        //     if(Row >= AuxVariables.NRows) Row = AuxVariables.NRows-1;
+        //     else if(Row < 0) Row = 0;
+        //     if(Section >= AuxVariables.NSections) Section = AuxVariables.NSections-1;
+        //     else if(Section < 0) Section = 0;
 
-            noalias(GlobalCoordinates) = itNodeNew->Coordinates(); //Coordinates of new nodes are still in the original position
-            bool IsInside = false;
-            Element::Pointer pElementOld;
+        //     noalias(GlobalCoordinates) = itNodeNew->Coordinates(); //Coordinates of new nodes are still in the original position
+        //     bool IsInside = false;
+        //     Element::Pointer pElementOld;
         
-            for(unsigned int m = 0; m < (ElementOldCellMatrix[Row][Column][Section]).size(); m++)
-            {
-                pElementOld = ElementOldCellMatrix[Row][Column][Section][m];
-                IsInside = pElementOld->GetGeometry().IsInside(GlobalCoordinates,LocalCoordinates); //Checks whether the global coordinates fall inside the original old element
-                if(IsInside) break;
-            }
-            if(IsInside==false)
-            {
-                for(unsigned int m = 0; m < (ElementOldCellMatrix[Row][Column][Section]).size(); m++)
-                {
-                    pElementOld = ElementOldCellMatrix[Row][Column][Section][m];
-                    IsInside = pElementOld->GetGeometry().IsInside(GlobalCoordinates,LocalCoordinates,1.0e-5);
-                    if(IsInside) break;
-                }
-            }
-            if(IsInside == false)
-                std::cout << "ERROR!!, NONE OF THE OLD ELEMENTS CONTAINS NODE: " << itNodeNew->Id() << std::endl;
+        //     for(unsigned int m = 0; m < (ElementOldCellMatrix[Row][Column][Section]).size(); m++)
+        //     {
+        //         pElementOld = ElementOldCellMatrix[Row][Column][Section][m];
+        //         IsInside = pElementOld->GetGeometry().IsInside(GlobalCoordinates,LocalCoordinates); //Checks whether the global coordinates fall inside the original old element
+        //         if(IsInside) break;
+        //     }
+        //     if(IsInside==false)
+        //     {
+        //         for(unsigned int m = 0; m < (ElementOldCellMatrix[Row][Column][Section]).size(); m++)
+        //         {
+        //             pElementOld = ElementOldCellMatrix[Row][Column][Section][m];
+        //             IsInside = pElementOld->GetGeometry().IsInside(GlobalCoordinates,LocalCoordinates,1.0e-5);
+        //             if(IsInside) break;
+        //         }
+        //     }
+        //     if(IsInside == false)
+        //         std::cout << "ERROR!!, NONE OF THE OLD ELEMENTS CONTAINS NODE: " << itNodeNew->Id() << std::endl;
             
-            PointsNumber = pElementOld->GetGeometry().PointsNumber();
-            Vector ShapeFunctionsValuesVector(PointsNumber);
-            Vector NodalVariableVector(PointsNumber);
+        //     PointsNumber = pElementOld->GetGeometry().PointsNumber();
+        //     Vector ShapeFunctionsValuesVector(PointsNumber);
+        //     Vector NodalVariableVector(PointsNumber);
 
-            pElementOld->GetGeometry().ShapeFunctionsValues(ShapeFunctionsValuesVector,LocalCoordinates);
+        //     pElementOld->GetGeometry().ShapeFunctionsValues(ShapeFunctionsValuesVector,LocalCoordinates);
 
-            // Interpolation of nodal variables
-            if( itNodeNew->IsFixed(DISPLACEMENT_X)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_X);
-                }
-                itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(VELOCITY_X)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_X);
-                }
-                itNodeNew->FastGetSolutionStepValue(VELOCITY_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(ACCELERATION_X)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_X);
-                }
-                itNodeNew->FastGetSolutionStepValue(ACCELERATION_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(DISPLACEMENT_Y)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_Y);
-                }
-                itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(VELOCITY_Y)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_Y);
-                }
-                itNodeNew->FastGetSolutionStepValue(VELOCITY_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(ACCELERATION_Y)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_Y);
-                }
-                itNodeNew->FastGetSolutionStepValue(ACCELERATION_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(DISPLACEMENT_Z)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_Z);
-                }
-                itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(VELOCITY_Z)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_Z);
-                }
-                itNodeNew->FastGetSolutionStepValue(VELOCITY_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(ACCELERATION_Z)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_Z);
-                }
-                itNodeNew->FastGetSolutionStepValue(ACCELERATION_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-            if( itNodeNew->IsFixed(WATER_PRESSURE)==false )
-            {
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(WATER_PRESSURE);
-                }
-                itNodeNew->FastGetSolutionStepValue(WATER_PRESSURE) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-                for(int j = 0; j < PointsNumber; j++)
-                {
-                    NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DT_WATER_PRESSURE);
-                }
-                itNodeNew->FastGetSolutionStepValue(DT_WATER_PRESSURE) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
-            }
-        }
+        //     // Interpolation of nodal variables
+        //     if( itNodeNew->IsFixed(DISPLACEMENT_X)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_X);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(VELOCITY_X)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_X);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(VELOCITY_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(ACCELERATION_X)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_X);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(ACCELERATION_X) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(DISPLACEMENT_Y)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_Y);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(VELOCITY_Y)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_Y);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(VELOCITY_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(ACCELERATION_Y)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_Y);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(ACCELERATION_Y) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(DISPLACEMENT_Z)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DISPLACEMENT_Z);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(DISPLACEMENT_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(VELOCITY_Z)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(VELOCITY_Z);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(VELOCITY_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(ACCELERATION_Z)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(ACCELERATION_Z);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(ACCELERATION_Z) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        //     if( itNodeNew->IsFixed(WATER_PRESSURE)==false )
+        //     {
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(WATER_PRESSURE);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(WATER_PRESSURE) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //         for(int j = 0; j < PointsNumber; j++)
+        //         {
+        //             NodalVariableVector[j] = pElementOld->GetGeometry().GetPoint(j).FastGetSolutionStepValue(DT_WATER_PRESSURE);
+        //         }
+        //         itNodeNew->FastGetSolutionStepValue(DT_WATER_PRESSURE) = inner_prod(ShapeFunctionsValuesVector,NodalVariableVector);
+        //     }
+        // }
     }
 
 ///----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -946,356 +946,356 @@ protected:
         ModelPart& rModelPartOld,
         ModelPart& rModelPartNew)
     {        
-        // Define GaussPointOld Cell matrix
-        std::vector< std::vector< std::vector< std::vector<GaussPointOld> > > > BodyGaussPointOldCellMatrix;
-        BodyGaussPointOldCellMatrix.resize(AuxVariables.NRows);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-            BodyGaussPointOldCellMatrix[i].resize(AuxVariables.NColumns);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-        {
-            for(int j = 0; j < AuxVariables.NColumns; j++)
-            {
-                BodyGaussPointOldCellMatrix[i][j].resize(AuxVariables.NSections);
-            }
-        }
+        // // Define GaussPointOld Cell matrix
+        // std::vector< std::vector< std::vector< std::vector<GaussPointOld> > > > BodyGaussPointOldCellMatrix;
+        // BodyGaussPointOldCellMatrix.resize(AuxVariables.NRows);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        //     BodyGaussPointOldCellMatrix[i].resize(AuxVariables.NColumns);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        // {
+        //     for(int j = 0; j < AuxVariables.NColumns; j++)
+        //     {
+        //         BodyGaussPointOldCellMatrix[i][j].resize(AuxVariables.NSections);
+        //     }
+        // }
 
-        std::vector< std::vector< std::vector< std::vector<GaussPointOld> > > > GaussPointOldCellMatrix;
-        GaussPointOldCellMatrix.resize(AuxVariables.NRows);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-            GaussPointOldCellMatrix[i].resize(AuxVariables.NColumns);
-        for(int i = 0; i < AuxVariables.NRows; i++)
-        {
-            for(int j = 0; j < AuxVariables.NColumns; j++)
-            {
-                GaussPointOldCellMatrix[i][j].resize(AuxVariables.NSections);
-            }
-        }
+        // std::vector< std::vector< std::vector< std::vector<GaussPointOld> > > > GaussPointOldCellMatrix;
+        // GaussPointOldCellMatrix.resize(AuxVariables.NRows);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        //     GaussPointOldCellMatrix[i].resize(AuxVariables.NColumns);
+        // for(int i = 0; i < AuxVariables.NRows; i++)
+        // {
+        //     for(int j = 0; j < AuxVariables.NColumns; j++)
+        //     {
+        //         GaussPointOldCellMatrix[i][j].resize(AuxVariables.NSections);
+        //     }
+        // }
         
-        // Locate Old Gauss Points in cells
-        GaussPointOld MyGaussPointOld;
-        GeometryData::IntegrationMethod MyIntegrationMethod;
-        const ProcessInfo& CurrentProcessInfoOld = rModelPartOld.GetProcessInfo();
-        array_1d<double,3> AuxLocalCoordinates;
+        // // Locate Old Gauss Points in cells
+        // GaussPointOld MyGaussPointOld;
+        // GeometryData::IntegrationMethod MyIntegrationMethod;
+        // const ProcessInfo& CurrentProcessInfoOld = rModelPartOld.GetProcessInfo();
+        // array_1d<double,3> AuxLocalCoordinates;
 
-        unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
+        // unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
 
-        // Loop through all OLD BodySubModelParts
-        for(unsigned int i = 0; i < NumBodySubModelParts; i++)
-        {
-            ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
+        // // Loop through all OLD BodySubModelParts
+        // for(unsigned int i = 0; i < NumBodySubModelParts; i++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            #pragma omp parallel for private(MyGaussPointOld,MyIntegrationMethod,AuxLocalCoordinates)
-            for(int j = 0; j < NElems; j++)
-            {
-                ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
+        //     #pragma omp parallel for private(MyGaussPointOld,MyIntegrationMethod,AuxLocalCoordinates)
+        //     for(int j = 0; j < NElems; j++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
 
-                Element::GeometryType& rGeom = itElem->GetGeometry();
-                MyIntegrationMethod = itElem->GetIntegrationMethod();
-                const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
-                unsigned int NumGPoints = IntegrationPoints.size();
-                Vector detJContainer(NumGPoints);
-                rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
-                std::vector<double> StateVariableVector(NumGPoints);
-                itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoOld);
-                std::vector<double> DamageVector(NumGPoints);
-                itElem->GetValueOnIntegrationPoints(DAMAGE_VARIABLE,DamageVector,CurrentProcessInfoOld);
-                int Row;
-                int Column;
-                int Section;
+        //         Element::GeometryType& rGeom = itElem->GetGeometry();
+        //         MyIntegrationMethod = itElem->GetIntegrationMethod();
+        //         const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
+        //         unsigned int NumGPoints = IntegrationPoints.size();
+        //         Vector detJContainer(NumGPoints);
+        //         rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
+        //         std::vector<double> StateVariableVector(NumGPoints);
+        //         itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoOld);
+        //         std::vector<double> DamageVector(NumGPoints);
+        //         itElem->GetValueOnIntegrationPoints(DAMAGE_VARIABLE,DamageVector,CurrentProcessInfoOld);
+        //         int Row;
+        //         int Column;
+        //         int Section;
 
-                // Loop through GaussPoints
-                for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
-                {
-                    // GaussPointOld Coordinates
-                    AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
-                    AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
-                    AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
-                    rGeom.GlobalCoordinates(MyGaussPointOld.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
+        //         // Loop through GaussPoints
+        //         for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
+        //         {
+        //             // GaussPointOld Coordinates
+        //             AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
+        //             AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
+        //             AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
+        //             rGeom.GlobalCoordinates(MyGaussPointOld.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
 
-                    // GaussPointOld Weight
-                    MyGaussPointOld.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
+        //             // GaussPointOld Weight
+        //             MyGaussPointOld.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
 
-                    // GaussPointOld StateVariable and Damage
-                    MyGaussPointOld.StateVariable = StateVariableVector[GPoint];
-                    MyGaussPointOld.Damage = DamageVector[GPoint];
+        //             // GaussPointOld StateVariable and Damage
+        //             MyGaussPointOld.StateVariable = StateVariableVector[GPoint];
+        //             MyGaussPointOld.Damage = DamageVector[GPoint];
 
-                    // GaussPointOld Row and Column
-                    Row = int((AuxVariables.Y_max-MyGaussPointOld.Coordinates[1])/AuxVariables.RowSize);
-                    Column = int((MyGaussPointOld.Coordinates[0]-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    Section = int((MyGaussPointOld.Coordinates[2]-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                    #pragma omp critical
-                    {
-                        BodyGaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
-                        GaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
-                    }
-                }
-            }
-        }
+        //             // GaussPointOld Row and Column
+        //             Row = int((AuxVariables.Y_max-MyGaussPointOld.Coordinates[1])/AuxVariables.RowSize);
+        //             Column = int((MyGaussPointOld.Coordinates[0]-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             Section = int((MyGaussPointOld.Coordinates[2]-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             #pragma omp critical
+        //             {
+        //                 BodyGaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
+        //                 GaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
+        //             }
+        //         }
+        //     }
+        // }
         
-        unsigned int NumInterfaceSubModelPartsOld = rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"].size();
+        // unsigned int NumInterfaceSubModelPartsOld = rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"].size();
 
-        // Loop through all OLD InterfaceSubModelParts
-        for(unsigned int i = 0; i < NumInterfaceSubModelPartsOld; i++)
-        {
-            ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"][i].GetString());
+        // // Loop through all OLD InterfaceSubModelParts
+        // for(unsigned int i = 0; i < NumInterfaceSubModelPartsOld; i++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartOld.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_old_list"][i].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            #pragma omp parallel for private(MyGaussPointOld,MyIntegrationMethod,AuxLocalCoordinates)
-            for(int j = 0; j < NElems; j++)
-            {
-                ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
+        //     #pragma omp parallel for private(MyGaussPointOld,MyIntegrationMethod,AuxLocalCoordinates)
+        //     for(int j = 0; j < NElems; j++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
 
-                Element::GeometryType& rGeom = itElem->GetGeometry();
-                MyIntegrationMethod = GeometryData::GI_GAUSS_1;
-                const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
-                unsigned int NumGPoints = IntegrationPoints.size();
-                Vector detJContainer(NumGPoints);
-                rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
-                std::vector<double> StateVariableVector(NumGPoints);
-                itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoOld);
-                int Row;
-                int Column;
-                int Section;
+        //         Element::GeometryType& rGeom = itElem->GetGeometry();
+        //         MyIntegrationMethod = GeometryData::GI_GAUSS_1;
+        //         const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
+        //         unsigned int NumGPoints = IntegrationPoints.size();
+        //         Vector detJContainer(NumGPoints);
+        //         rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
+        //         std::vector<double> StateVariableVector(NumGPoints);
+        //         itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoOld);
+        //         int Row;
+        //         int Column;
+        //         int Section;
 
-                // Loop through GaussPoints
-                for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
-                {
-                    // GaussPointOld Coordinates
-                    AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
-                    AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
-                    AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
-                    rGeom.GlobalCoordinates(MyGaussPointOld.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
+        //         // Loop through GaussPoints
+        //         for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
+        //         {
+        //             // GaussPointOld Coordinates
+        //             AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
+        //             AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
+        //             AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
+        //             rGeom.GlobalCoordinates(MyGaussPointOld.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
 
-                    // GaussPointOld Weight
-                    MyGaussPointOld.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
+        //             // GaussPointOld Weight
+        //             MyGaussPointOld.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
 
-                    // GaussPointOld StateVariable
-                    MyGaussPointOld.StateVariable = StateVariableVector[GPoint];
-                    MyGaussPointOld.Damage = MyGaussPointOld.StateVariable;
+        //             // GaussPointOld StateVariable
+        //             MyGaussPointOld.StateVariable = StateVariableVector[GPoint];
+        //             MyGaussPointOld.Damage = MyGaussPointOld.StateVariable;
 
-                    // GaussPointOld Row and Column
-                    Row = int((AuxVariables.Y_max-MyGaussPointOld.Coordinates[1])/AuxVariables.RowSize);
-                    Column = int((MyGaussPointOld.Coordinates[0]-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    Section = int((MyGaussPointOld.Coordinates[2]-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                    #pragma omp critical
-                    {
-                        GaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
-                    }
-                }
-            }
-        }
+        //             // GaussPointOld Row and Column
+        //             Row = int((AuxVariables.Y_max-MyGaussPointOld.Coordinates[1])/AuxVariables.RowSize);
+        //             Column = int((MyGaussPointOld.Coordinates[0]-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             Section = int((MyGaussPointOld.Coordinates[2]-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             #pragma omp critical
+        //             {
+        //                 GaussPointOldCellMatrix[Row][Column][Section].push_back(MyGaussPointOld);
+        //             }
+        //         }
+        //     }
+        // }
         
-        // Transfer state variables from old Gauss points to new Gauss Points (nonlocal average)
-        const ProcessInfo& CurrentProcessInfoNew = rModelPartNew.GetProcessInfo();
-        const double PropagationLength = rParameters["fracture_data"]["propagation_length"].GetDouble();
-        array_1d<double,3> AuxGlobalCoordinates;
+        // // Transfer state variables from old Gauss points to new Gauss Points (nonlocal average)
+        // const ProcessInfo& CurrentProcessInfoNew = rModelPartNew.GetProcessInfo();
+        // const double PropagationLength = rParameters["fracture_data"]["propagation_length"].GetDouble();
+        // array_1d<double,3> AuxGlobalCoordinates;
 
-        // Loop through all NEW BodySubModelParts
-        for(unsigned int i = 0; i < NumBodySubModelParts; i++)
-        {
-            ModelPart& SubModelPart = rModelPartNew.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
+        // // Loop through all NEW BodySubModelParts
+        // for(unsigned int i = 0; i < NumBodySubModelParts; i++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartNew.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            double DamageThreshold = el_begin->GetProperties()[DAMAGE_THRESHOLD];
+        //     double DamageThreshold = el_begin->GetProperties()[DAMAGE_THRESHOLD];
 
-            #pragma omp parallel for private(MyIntegrationMethod,AuxLocalCoordinates,AuxGlobalCoordinates)
-            for(int j = 0; j < NElems; j++)
-            {
-                ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
+        //     #pragma omp parallel for private(MyIntegrationMethod,AuxLocalCoordinates,AuxGlobalCoordinates)
+        //     for(int j = 0; j < NElems; j++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
 
-                Element::GeometryType& rGeom = itElem->GetGeometry();
-                MyIntegrationMethod = itElem->GetIntegrationMethod();
-                const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
-                unsigned int NumGPoints = IntegrationPoints.size();
-                std::vector<double> StateVariableVector(NumGPoints);
+        //         Element::GeometryType& rGeom = itElem->GetGeometry();
+        //         MyIntegrationMethod = itElem->GetIntegrationMethod();
+        //         const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
+        //         unsigned int NumGPoints = IntegrationPoints.size();
+        //         std::vector<double> StateVariableVector(NumGPoints);
 
-                // Loop through NEW GaussPoints
-                for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
-                {
-                    // GaussPointNew Coordinates
-                    AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
-                    AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
-                    AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
-                    rGeom.GlobalCoordinates(AuxGlobalCoordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
-                    double X_me = AuxGlobalCoordinates[0];
-                    double Y_me = AuxGlobalCoordinates[1];
-                    double Z_me = AuxGlobalCoordinates[2];
+        //         // Loop through NEW GaussPoints
+        //         for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
+        //         {
+        //             // GaussPointNew Coordinates
+        //             AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
+        //             AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
+        //             AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
+        //             rGeom.GlobalCoordinates(AuxGlobalCoordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
+        //             double X_me = AuxGlobalCoordinates[0];
+        //             double Y_me = AuxGlobalCoordinates[1];
+        //             double Z_me = AuxGlobalCoordinates[2];
 
-                    // GaussPointNew search area
-                    double X_left = X_me - PropagationLength;
-                    double X_right = X_me + PropagationLength;
-                    double Y_top = Y_me + PropagationLength;
-                    double Y_bot = Y_me - PropagationLength;
-                    double Z_back = Z_me - PropagationLength;
-                    double Z_front = Z_me + PropagationLength;
+        //             // GaussPointNew search area
+        //             double X_left = X_me - PropagationLength;
+        //             double X_right = X_me + PropagationLength;
+        //             double Y_top = Y_me + PropagationLength;
+        //             double Y_bot = Y_me - PropagationLength;
+        //             double Z_back = Z_me - PropagationLength;
+        //             double Z_front = Z_me + PropagationLength;
 
-                    int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
-                    int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
-                    int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                    int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
+        //             int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
+        //             int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
         
-                    if(Column_left < 0) Column_left = 0;
-                    if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
-                    if(Row_top < 0) Row_top = 0;
-                    if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
-                    if(Section_back < 0) Section_back = 0;
-                    if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
+        //             if(Column_left < 0) Column_left = 0;
+        //             if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
+        //             if(Row_top < 0) Row_top = 0;
+        //             if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
+        //             if(Section_back < 0) Section_back = 0;
+        //             if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
         
-                    // Search GaussPointOld neighbours around the GaussPointNew and compute nonlocal state variable
-                    double Numerator = 0.0;
-                    double WeightingFunctionDenominator = 0.0;
-                    double Distance;
-                    for(int s = Section_back; s <= Section_front; s++)
-                    {
-                        for(int k = Row_top; k <= Row_bot; k++)
-                        {
-                            for(int l = Column_left; l<= Column_right; l++)
-                            {
-                                for(unsigned int m = 0; m < BodyGaussPointOldCellMatrix[k][l][s].size(); m++)
-                                {
-                                    GaussPointOld& rOtherGaussPointOld = BodyGaussPointOldCellMatrix[k][l][s][m];
+        //             // Search GaussPointOld neighbours around the GaussPointNew and compute nonlocal state variable
+        //             double Numerator = 0.0;
+        //             double WeightingFunctionDenominator = 0.0;
+        //             double Distance;
+        //             for(int s = Section_back; s <= Section_front; s++)
+        //             {
+        //                 for(int k = Row_top; k <= Row_bot; k++)
+        //                 {
+        //                     for(int l = Column_left; l<= Column_right; l++)
+        //                     {
+        //                         for(unsigned int m = 0; m < BodyGaussPointOldCellMatrix[k][l][s].size(); m++)
+        //                         {
+        //                             GaussPointOld& rOtherGaussPointOld = BodyGaussPointOldCellMatrix[k][l][s][m];
 
-                                    Distance = sqrt((rOtherGaussPointOld.Coordinates[0]-X_me)*(rOtherGaussPointOld.Coordinates[0]-X_me) +
-                                                    (rOtherGaussPointOld.Coordinates[1]-Y_me)*(rOtherGaussPointOld.Coordinates[1]-Y_me) +
-                                                    (rOtherGaussPointOld.Coordinates[2]-Z_me)*(rOtherGaussPointOld.Coordinates[2]-Z_me));
+        //                             Distance = sqrt((rOtherGaussPointOld.Coordinates[0]-X_me)*(rOtherGaussPointOld.Coordinates[0]-X_me) +
+        //                                             (rOtherGaussPointOld.Coordinates[1]-Y_me)*(rOtherGaussPointOld.Coordinates[1]-Y_me) +
+        //                                             (rOtherGaussPointOld.Coordinates[2]-Z_me)*(rOtherGaussPointOld.Coordinates[2]-Z_me));
 
-                                    if(Distance <= PropagationLength)
-                                    {
-                                        Numerator += rOtherGaussPointOld.Weight
-                                                    *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength))
-                                                    *rOtherGaussPointOld.StateVariable;
-                                        WeightingFunctionDenominator += rOtherGaussPointOld.Weight
-                                                                        *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // Save computed stateVariable
-                    if(WeightingFunctionDenominator > 0.0)
-                        StateVariableVector[GPoint] = Numerator/WeightingFunctionDenominator;
-                    else
-                        StateVariableVector[GPoint] = DamageThreshold;
-                }
-                // Set stateVariable of new GaussPoints
-                itElem->SetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoNew);
-            }
-        }
+        //                             if(Distance <= PropagationLength)
+        //                             {
+        //                                 Numerator += rOtherGaussPointOld.Weight
+        //                                             *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength))
+        //                                             *rOtherGaussPointOld.StateVariable;
+        //                                 WeightingFunctionDenominator += rOtherGaussPointOld.Weight
+        //                                                                 *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength));
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //             // Save computed stateVariable
+        //             if(WeightingFunctionDenominator > 0.0)
+        //                 StateVariableVector[GPoint] = Numerator/WeightingFunctionDenominator;
+        //             else
+        //                 StateVariableVector[GPoint] = DamageThreshold;
+        //         }
+        //         // Set stateVariable of new GaussPoints
+        //         itElem->SetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoNew);
+        //     }
+        // }
         
-        unsigned int NumInterfaceSubModelParts = rParameters["fracture_data"]["interface_domain_sub_model_part_list"].size();
-        const double PropagationDamage = rParameters["fracture_data"]["propagation_damage"].GetDouble();
+        // unsigned int NumInterfaceSubModelParts = rParameters["fracture_data"]["interface_domain_sub_model_part_list"].size();
+        // const double PropagationDamage = rParameters["fracture_data"]["propagation_damage"].GetDouble();
 
-        // Loop through all NEW InterfaceSubModelParts
-        for(unsigned int i = 0; i < NumInterfaceSubModelParts; i++)
-        {
-            ModelPart& SubModelPart = rModelPartNew.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_list"][i].GetString());
+        // // Loop through all NEW InterfaceSubModelParts
+        // for(unsigned int i = 0; i < NumInterfaceSubModelParts; i++)
+        // {
+        //     ModelPart& SubModelPart = rModelPartNew.GetSubModelPart(rParameters["fracture_data"]["interface_domain_sub_model_part_list"][i].GetString());
 
-            int NElems = static_cast<int>(SubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(SubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = SubModelPart.ElementsBegin();
 
-            //double DamageThreshold = el_begin->GetProperties()[DAMAGE_THRESHOLD];
+        //     //double DamageThreshold = el_begin->GetProperties()[DAMAGE_THRESHOLD];
 
-            #pragma omp parallel for private(MyIntegrationMethod,AuxLocalCoordinates,AuxGlobalCoordinates)
-            for(int j = 0; j < NElems; j++)
-            {
-                ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
+        //     #pragma omp parallel for private(MyIntegrationMethod,AuxLocalCoordinates,AuxGlobalCoordinates)
+        //     for(int j = 0; j < NElems; j++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
 
-                Element::GeometryType& rGeom = itElem->GetGeometry();
-                MyIntegrationMethod = GeometryData::GI_GAUSS_1;
-                const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
-                unsigned int NumGPoints = IntegrationPoints.size();
-                std::vector<double> StateVariableVector(NumGPoints);
+        //         Element::GeometryType& rGeom = itElem->GetGeometry();
+        //         MyIntegrationMethod = GeometryData::GI_GAUSS_1;
+        //         const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
+        //         unsigned int NumGPoints = IntegrationPoints.size();
+        //         std::vector<double> StateVariableVector(NumGPoints);
 
-                // Loop through NEW GaussPoints
-                for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
-                {
-                    // GaussPointNew Coordinates
-                    AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
-                    AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
-                    AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
-                    rGeom.GlobalCoordinates(AuxGlobalCoordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
-                    double X_me = AuxGlobalCoordinates[0];
-                    double Y_me = AuxGlobalCoordinates[1];
-                    double Z_me = AuxGlobalCoordinates[2];
+        //         // Loop through NEW GaussPoints
+        //         for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
+        //         {
+        //             // GaussPointNew Coordinates
+        //             AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
+        //             AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
+        //             AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
+        //             rGeom.GlobalCoordinates(AuxGlobalCoordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
+        //             double X_me = AuxGlobalCoordinates[0];
+        //             double Y_me = AuxGlobalCoordinates[1];
+        //             double Z_me = AuxGlobalCoordinates[2];
                     
-                    // GaussPointNew search area
-                    double X_left = X_me - PropagationLength;
-                    double X_right = X_me + PropagationLength;
-                    double Y_top = Y_me + PropagationLength;
-                    double Y_bot = Y_me - PropagationLength;
-                    double Z_back = Z_me - PropagationLength;
-                    double Z_front = Z_me + PropagationLength;
+        //             // GaussPointNew search area
+        //             double X_left = X_me - PropagationLength;
+        //             double X_right = X_me + PropagationLength;
+        //             double Y_top = Y_me + PropagationLength;
+        //             double Y_bot = Y_me - PropagationLength;
+        //             double Z_back = Z_me - PropagationLength;
+        //             double Z_front = Z_me + PropagationLength;
 
-                    int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
-                    int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
-                    int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
-                    int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
-                    int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             int Column_left = int((X_left-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             int Column_right = int((X_right-AuxVariables.X_min)/AuxVariables.ColumnSize);
+        //             int Row_top = int((AuxVariables.Y_max-Y_top)/AuxVariables.RowSize);
+        //             int Row_bot = int((AuxVariables.Y_max-Y_bot)/AuxVariables.RowSize);
+        //             int Section_back = int((Z_back-AuxVariables.Z_min)/AuxVariables.SectionSize);
+        //             int Section_front = int((Z_front-AuxVariables.Z_min)/AuxVariables.SectionSize);
 
-                    if(Column_left < 0) Column_left = 0;
-                    if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
-                    if(Row_top < 0) Row_top = 0;
-                    if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
-                    if(Section_back < 0) Section_back = 0;
-                    if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
+        //             if(Column_left < 0) Column_left = 0;
+        //             if(Column_right >= AuxVariables.NColumns) Column_right = AuxVariables.NColumns-1;
+        //             if(Row_top < 0) Row_top = 0;
+        //             if(Row_bot >= AuxVariables.NRows) Row_bot = AuxVariables.NRows-1;
+        //             if(Section_back < 0) Section_back = 0;
+        //             if(Section_front >= AuxVariables.NSections) Section_front = AuxVariables.NSections-1;
                     
-                    // Search GaussPointOld neighbours around the GaussPointNew and compute nonlocal state variable
-                    double Numerator = 0.0;
-                    double WeightingFunctionDenominator = 0.0;
-                    double Distance;
-                    for(int s = Section_back; s <= Section_front; s++)
-                    {
-                        for(int k = Row_top; k <= Row_bot; k++)
-                        {
-                            for(int l = Column_left; l<= Column_right; l++)
-                            {
-                                for(unsigned int m = 0; m < GaussPointOldCellMatrix[k][l][s].size(); m++)
-                                {
-                                    GaussPointOld& rOtherGaussPointOld = GaussPointOldCellMatrix[k][l][s][m];
+        //             // Search GaussPointOld neighbours around the GaussPointNew and compute nonlocal state variable
+        //             double Numerator = 0.0;
+        //             double WeightingFunctionDenominator = 0.0;
+        //             double Distance;
+        //             for(int s = Section_back; s <= Section_front; s++)
+        //             {
+        //                 for(int k = Row_top; k <= Row_bot; k++)
+        //                 {
+        //                     for(int l = Column_left; l<= Column_right; l++)
+        //                     {
+        //                         for(unsigned int m = 0; m < GaussPointOldCellMatrix[k][l][s].size(); m++)
+        //                         {
+        //                             GaussPointOld& rOtherGaussPointOld = GaussPointOldCellMatrix[k][l][s][m];
 
-                                    Distance = sqrt((rOtherGaussPointOld.Coordinates[0]-X_me)*(rOtherGaussPointOld.Coordinates[0]-X_me) +
-                                                    (rOtherGaussPointOld.Coordinates[1]-Y_me)*(rOtherGaussPointOld.Coordinates[1]-Y_me) +
-                                                    (rOtherGaussPointOld.Coordinates[2]-Z_me)*(rOtherGaussPointOld.Coordinates[2]-Z_me));
+        //                             Distance = sqrt((rOtherGaussPointOld.Coordinates[0]-X_me)*(rOtherGaussPointOld.Coordinates[0]-X_me) +
+        //                                             (rOtherGaussPointOld.Coordinates[1]-Y_me)*(rOtherGaussPointOld.Coordinates[1]-Y_me) +
+        //                                             (rOtherGaussPointOld.Coordinates[2]-Z_me)*(rOtherGaussPointOld.Coordinates[2]-Z_me));
 
-                                    if(Distance <= PropagationLength)
-                                    {
-                                        Numerator += rOtherGaussPointOld.Weight
-                                                    *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength))
-                                                    *rOtherGaussPointOld.Damage;
-                                        WeightingFunctionDenominator += rOtherGaussPointOld.Weight
-                                                                        *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength));
-                                    }
-                                }
-                            }
-                        }
-                    }
+        //                             if(Distance <= PropagationLength)
+        //                             {
+        //                                 Numerator += rOtherGaussPointOld.Weight
+        //                                             *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength))
+        //                                             *rOtherGaussPointOld.Damage;
+        //                                 WeightingFunctionDenominator += rOtherGaussPointOld.Weight
+        //                                                                 *exp(-4.0*Distance*Distance/(PropagationLength*PropagationLength));
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
 
-                    // Save computed stateVariable
-                    if(WeightingFunctionDenominator > 0.0)
-                    {
-                        StateVariableVector[GPoint] = Numerator/WeightingFunctionDenominator;
-                        if(StateVariableVector[GPoint] < PropagationDamage)
-                        {
-                            StateVariableVector[GPoint] = PropagationDamage;
-                        }
-                    }
-                    else
-                        StateVariableVector[GPoint] = PropagationDamage;
-                }
-                // Set stateVariable of new GaussPoints
-                itElem->SetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoNew);
-            }
-        }
+        //             // Save computed stateVariable
+        //             if(WeightingFunctionDenominator > 0.0)
+        //             {
+        //                 StateVariableVector[GPoint] = Numerator/WeightingFunctionDenominator;
+        //                 if(StateVariableVector[GPoint] < PropagationDamage)
+        //                 {
+        //                     StateVariableVector[GPoint] = PropagationDamage;
+        //                 }
+        //             }
+        //             else
+        //                 StateVariableVector[GPoint] = PropagationDamage;
+        //         }
+        //         // Set stateVariable of new GaussPoints
+        //         itElem->SetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfoNew);
+        //     }
+        // }
     }
 
 /// Common --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1306,7 +1306,7 @@ protected:
         const int NNodes = static_cast<int>(rModelPart.Nodes().size());
         ModelPart::NodesContainerType::iterator node_begin = rModelPart.NodesBegin();
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NNodes; i++)
         {
             ModelPart::NodesContainerType::iterator itNode = node_begin + i;
@@ -1325,7 +1325,7 @@ protected:
         const int NNodes = static_cast<int>(rModelPart.Nodes().size());
         ModelPart::NodesContainerType::iterator node_begin = rModelPart.NodesBegin();
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NNodes; i++)
         {
             ModelPart::NodesContainerType::iterator itNode = node_begin + i;
@@ -1344,94 +1344,94 @@ private:
         UtilityVariables& rAuxVariables,
         ModelPart& rModelPart)
     {
-        // Compute X, Y and Z limits of the current geometry
-        unsigned int NumThreads = OpenMPUtils::GetNumThreads();
-        std::vector<double> X_max_partition(NumThreads);
-        std::vector<double> X_min_partition(NumThreads);
-        std::vector<double> Y_max_partition(NumThreads);
-        std::vector<double> Y_min_partition(NumThreads);
-        std::vector<double> Z_max_partition(NumThreads);
-        std::vector<double> Z_min_partition(NumThreads);
+        // // Compute X, Y and Z limits of the current geometry
+        // unsigned int NumThreads = OpenMPUtils::GetNumThreads();
+        // std::vector<double> X_max_partition(NumThreads);
+        // std::vector<double> X_min_partition(NumThreads);
+        // std::vector<double> Y_max_partition(NumThreads);
+        // std::vector<double> Y_min_partition(NumThreads);
+        // std::vector<double> Z_max_partition(NumThreads);
+        // std::vector<double> Z_min_partition(NumThreads);
 
-        const int NNodes = static_cast<int>(rModelPart.Nodes().size());
-        ModelPart::NodesContainerType::iterator node_begin = rModelPart.NodesBegin();
+        // const int NNodes = static_cast<int>(rModelPart.Nodes().size());
+        // ModelPart::NodesContainerType::iterator node_begin = rModelPart.NodesBegin();
 
-        #pragma omp parallel
-        {
-            int k = OpenMPUtils::ThisThread();
+        // #pragma omp parallel
+        // {
+        //     int k = OpenMPUtils::ThisThread();
 
-            X_max_partition[k] = node_begin->X();
-            X_min_partition[k] = X_max_partition[k];
-            Y_max_partition[k] = node_begin->Y();
-            Y_min_partition[k] = Y_max_partition[k];
-            Z_max_partition[k] = node_begin->Z();
-            Z_min_partition[k] = Z_max_partition[k];
+        //     X_max_partition[k] = node_begin->X();
+        //     X_min_partition[k] = X_max_partition[k];
+        //     Y_max_partition[k] = node_begin->Y();
+        //     Y_min_partition[k] = Y_max_partition[k];
+        //     Z_max_partition[k] = node_begin->Z();
+        //     Z_min_partition[k] = Z_max_partition[k];
 
-            double X_me, Y_me, Z_me;
+        //     double X_me, Y_me, Z_me;
 
-            #pragma omp for
-            for(int i = 0; i < NNodes; i++)
-            {
-                ModelPart::NodesContainerType::iterator itNode = node_begin + i;
+        //     #pragma omp for
+        //     for(int i = 0; i < NNodes; i++)
+        //     {
+        //         ModelPart::NodesContainerType::iterator itNode = node_begin + i;
 
-                X_me = itNode->X();
-                Y_me = itNode->Y();
-                Z_me = itNode->Z();
+        //         X_me = itNode->X();
+        //         Y_me = itNode->Y();
+        //         Z_me = itNode->Z();
 
-                if( X_me > X_max_partition[k] ) X_max_partition[k] = X_me;
-                else if( X_me < X_min_partition[k] ) X_min_partition[k] = X_me;
+        //         if( X_me > X_max_partition[k] ) X_max_partition[k] = X_me;
+        //         else if( X_me < X_min_partition[k] ) X_min_partition[k] = X_me;
 
-                if( Y_me > Y_max_partition[k] ) Y_max_partition[k] = Y_me;
-                else if( Y_me < Y_min_partition[k] ) Y_min_partition[k] = Y_me;
+        //         if( Y_me > Y_max_partition[k] ) Y_max_partition[k] = Y_me;
+        //         else if( Y_me < Y_min_partition[k] ) Y_min_partition[k] = Y_me;
 
-                if( Z_me > Z_max_partition[k] ) Z_max_partition[k] = Z_me;
-                else if( Z_me < Z_min_partition[k] ) Z_min_partition[k] = Z_me;
-            }
-        }
+        //         if( Z_me > Z_max_partition[k] ) Z_max_partition[k] = Z_me;
+        //         else if( Z_me < Z_min_partition[k] ) Z_min_partition[k] = Z_me;
+        //     }
+        // }
 
-        rAuxVariables.X_max = X_max_partition[0];
-        rAuxVariables.X_min = X_min_partition[0];
-        rAuxVariables.Y_max = Y_max_partition[0];
-        rAuxVariables.Y_min = Y_min_partition[0];
-        rAuxVariables.Z_max = Z_max_partition[0];
-        rAuxVariables.Z_min = Z_min_partition[0];
+        // rAuxVariables.X_max = X_max_partition[0];
+        // rAuxVariables.X_min = X_min_partition[0];
+        // rAuxVariables.Y_max = Y_max_partition[0];
+        // rAuxVariables.Y_min = Y_min_partition[0];
+        // rAuxVariables.Z_max = Z_max_partition[0];
+        // rAuxVariables.Z_min = Z_min_partition[0];
 
-        for(unsigned int i=1; i < NumThreads; i++)
-        {
-            if(X_max_partition[i] > rAuxVariables.X_max) rAuxVariables.X_max = X_max_partition[i];
-            if(X_min_partition[i] < rAuxVariables.X_min) rAuxVariables.X_min = X_min_partition[i];
-            if(Y_max_partition[i] > rAuxVariables.Y_max) rAuxVariables.Y_max = Y_max_partition[i];
-            if(Y_min_partition[i] < rAuxVariables.Y_min) rAuxVariables.Y_min = Y_min_partition[i];
-            if(Z_max_partition[i] > rAuxVariables.Z_max) rAuxVariables.Z_max = Z_max_partition[i];
-            if(Z_min_partition[i] < rAuxVariables.Z_min) rAuxVariables.Z_min = Z_min_partition[i];
-        }
+        // for(unsigned int i=1; i < NumThreads; i++)
+        // {
+        //     if(X_max_partition[i] > rAuxVariables.X_max) rAuxVariables.X_max = X_max_partition[i];
+        //     if(X_min_partition[i] < rAuxVariables.X_min) rAuxVariables.X_min = X_min_partition[i];
+        //     if(Y_max_partition[i] > rAuxVariables.Y_max) rAuxVariables.Y_max = Y_max_partition[i];
+        //     if(Y_min_partition[i] < rAuxVariables.Y_min) rAuxVariables.Y_min = Y_min_partition[i];
+        //     if(Z_max_partition[i] > rAuxVariables.Z_max) rAuxVariables.Z_max = Z_max_partition[i];
+        //     if(Z_min_partition[i] < rAuxVariables.Z_min) rAuxVariables.Z_min = Z_min_partition[i];
+        // }
 
-        // Calculate Average Element Length
-        double AverageElementLength = 0.0;
+        // // Calculate Average Element Length
+        // double AverageElementLength = 0.0;
 
-        int NElems = static_cast<int>(rModelPart.Elements().size());
-        ModelPart::ElementsContainerType::iterator el_begin = rModelPart.ElementsBegin();
+        // int NElems = static_cast<int>(rModelPart.Elements().size());
+        // ModelPart::ElementsContainerType::iterator el_begin = rModelPart.ElementsBegin();
 
-        #pragma omp parallel for reduction(+:AverageElementLength)
-        for(int i = 0; i < NElems; i++)
-        {
-            ModelPart::ElementsContainerType::iterator itElem = el_begin + i;
+        // #pragma omp parallel for reduction(+:AverageElementLength)
+        // for(int i = 0; i < NElems; i++)
+        // {
+        //     ModelPart::ElementsContainerType::iterator itElem = el_begin + i;
 
-            AverageElementLength += itElem->GetGeometry().Length();
-        }
+        //     AverageElementLength += itElem->GetGeometry().Length();
+        // }
 
-        AverageElementLength = AverageElementLength/NElems;
+        // AverageElementLength = AverageElementLength/NElems;
 
-        // Compute FracturePoints CellMatrix dimensions
-        rAuxVariables.NRows = int((rAuxVariables.Y_max-rAuxVariables.Y_min)/AverageElementLength);
-        rAuxVariables.NColumns = int((rAuxVariables.X_max-rAuxVariables.X_min)/AverageElementLength);
-        rAuxVariables.NSections = int((rAuxVariables.Z_max-rAuxVariables.Z_min)/AverageElementLength);
-        if(rAuxVariables.NRows <= 0) rAuxVariables.NRows = 1;
-        if(rAuxVariables.NColumns <= 0) rAuxVariables.NColumns = 1;
-        if(rAuxVariables.NSections <= 0) rAuxVariables.NSections = 1;
-        rAuxVariables.RowSize = (rAuxVariables.Y_max-rAuxVariables.Y_min)/rAuxVariables.NRows;
-        rAuxVariables.ColumnSize = (rAuxVariables.X_max-rAuxVariables.X_min)/rAuxVariables.NColumns;
-        rAuxVariables.SectionSize = (rAuxVariables.Z_max-rAuxVariables.Z_min)/rAuxVariables.NSections;
+        // // Compute FracturePoints CellMatrix dimensions
+        // rAuxVariables.NRows = int((rAuxVariables.Y_max-rAuxVariables.Y_min)/AverageElementLength);
+        // rAuxVariables.NColumns = int((rAuxVariables.X_max-rAuxVariables.X_min)/AverageElementLength);
+        // rAuxVariables.NSections = int((rAuxVariables.Z_max-rAuxVariables.Z_min)/AverageElementLength);
+        // if(rAuxVariables.NRows <= 0) rAuxVariables.NRows = 1;
+        // if(rAuxVariables.NColumns <= 0) rAuxVariables.NColumns = 1;
+        // if(rAuxVariables.NSections <= 0) rAuxVariables.NSections = 1;
+        // rAuxVariables.RowSize = (rAuxVariables.Y_max-rAuxVariables.Y_min)/rAuxVariables.NRows;
+        // rAuxVariables.ColumnSize = (rAuxVariables.X_max-rAuxVariables.X_min)/rAuxVariables.NColumns;
+        // rAuxVariables.SectionSize = (rAuxVariables.Z_max-rAuxVariables.Z_min)/rAuxVariables.NSections;
     }
 
 /// Fracture Propagation Check ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1442,83 +1442,83 @@ private:
         Parameters& rParameters,
         ModelPart& rModelPart)
     {
-        // Compute FracturePointsCellMatrix dimensions
-        this->ComputeCellMatrixDimensions(rAuxVariables,rModelPart);
+        // // Compute FracturePointsCellMatrix dimensions
+        // this->ComputeCellMatrixDimensions(rAuxVariables,rModelPart);
 
-        rPropagationData.FracturePointsCellMatrix.resize(rAuxVariables.NRows);
-        for(int i = 0; i < rAuxVariables.NRows; i++)
-            rPropagationData.FracturePointsCellMatrix[i].resize(rAuxVariables.NColumns);
-        for(int i = 0; i < rAuxVariables.NRows; i++)
-        {
-            for(int j = 0; j < rAuxVariables.NColumns; j++)
-            {
-                rPropagationData.FracturePointsCellMatrix[i][j].resize(rAuxVariables.NSections);
-            }
-        }
+        // rPropagationData.FracturePointsCellMatrix.resize(rAuxVariables.NRows);
+        // for(int i = 0; i < rAuxVariables.NRows; i++)
+        //     rPropagationData.FracturePointsCellMatrix[i].resize(rAuxVariables.NColumns);
+        // for(int i = 0; i < rAuxVariables.NRows; i++)
+        // {
+        //     for(int j = 0; j < rAuxVariables.NColumns; j++)
+        //     {
+        //         rPropagationData.FracturePointsCellMatrix[i][j].resize(rAuxVariables.NSections);
+        //     }
+        // }
 
-        // Locate FracturePoints inside CellMatrix
-        FracturePoint MyFracturePoint;
-        GeometryData::IntegrationMethod MyIntegrationMethod;
-        const ProcessInfo& CurrentProcessInfo = rModelPart.GetProcessInfo();
-        array_1d<double,3> AuxLocalCoordinates;
+        // // Locate FracturePoints inside CellMatrix
+        // FracturePoint MyFracturePoint;
+        // GeometryData::IntegrationMethod MyIntegrationMethod;
+        // const ProcessInfo& CurrentProcessInfo = rModelPart.GetProcessInfo();
+        // array_1d<double,3> AuxLocalCoordinates;
 
-        unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
+        // unsigned int NumBodySubModelParts = rParameters["fracture_data"]["body_domain_sub_model_part_list"].size();
 
-        // Loop through all BodySubModelParts
-        for(unsigned int i = 0; i < NumBodySubModelParts; i++)
-        {
-            ModelPart& BodySubModelPart = rModelPart.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
+        // // Loop through all BodySubModelParts
+        // for(unsigned int i = 0; i < NumBodySubModelParts; i++)
+        // {
+        //     ModelPart& BodySubModelPart = rModelPart.GetSubModelPart(rParameters["fracture_data"]["body_domain_sub_model_part_list"][i].GetString());
 
-            int NElems = static_cast<int>(BodySubModelPart.Elements().size());
-            ModelPart::ElementsContainerType::iterator el_begin = BodySubModelPart.ElementsBegin();
+        //     int NElems = static_cast<int>(BodySubModelPart.Elements().size());
+        //     ModelPart::ElementsContainerType::iterator el_begin = BodySubModelPart.ElementsBegin();
 
-            // Loop through all body elements
-            #pragma omp parallel for private(MyFracturePoint,MyIntegrationMethod,AuxLocalCoordinates)
-            for(int j = 0; j < NElems; j++)
-            {
-                ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
+        //     // Loop through all body elements
+        //     #pragma omp parallel for private(MyFracturePoint,MyIntegrationMethod,AuxLocalCoordinates)
+        //     for(int j = 0; j < NElems; j++)
+        //     {
+        //         ModelPart::ElementsContainerType::iterator itElem = el_begin + j;
 
-                Element::GeometryType& rGeom = itElem->GetGeometry();
-                MyIntegrationMethod = itElem->GetIntegrationMethod();
-                const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
-                unsigned int NumGPoints = IntegrationPoints.size();
-                Vector detJContainer(NumGPoints);
-                rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
-                //~ std::vector<double> StateVariableVector(NumGPoints);
-                //~ itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfo);
-                std::vector<double> DamageVector(NumGPoints);
-                itElem->GetValueOnIntegrationPoints(DAMAGE_VARIABLE,DamageVector,CurrentProcessInfo);
-                int Row;
-                int Column;
-                int Section;
+        //         Element::GeometryType& rGeom = itElem->GetGeometry();
+        //         MyIntegrationMethod = itElem->GetIntegrationMethod();
+        //         const Element::GeometryType::IntegrationPointsArrayType& IntegrationPoints = rGeom.IntegrationPoints(MyIntegrationMethod);
+        //         unsigned int NumGPoints = IntegrationPoints.size();
+        //         Vector detJContainer(NumGPoints);
+        //         rGeom.DeterminantOfJacobian(detJContainer,MyIntegrationMethod);
+        //         //~ std::vector<double> StateVariableVector(NumGPoints);
+        //         //~ itElem->GetValueOnIntegrationPoints(STATE_VARIABLE,StateVariableVector,CurrentProcessInfo);
+        //         std::vector<double> DamageVector(NumGPoints);
+        //         itElem->GetValueOnIntegrationPoints(DAMAGE_VARIABLE,DamageVector,CurrentProcessInfo);
+        //         int Row;
+        //         int Column;
+        //         int Section;
 
-                // Loop through GaussPoints
-                for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
-                {
-                    // FracturePoint Coordinates
-                    AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
-                    AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
-                    AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
-                    rGeom.GlobalCoordinates(MyFracturePoint.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
+        //         // Loop through GaussPoints
+        //         for ( unsigned int GPoint = 0; GPoint < NumGPoints; GPoint++ )
+        //         {
+        //             // FracturePoint Coordinates
+        //             AuxLocalCoordinates[0] = IntegrationPoints[GPoint][0];
+        //             AuxLocalCoordinates[1] = IntegrationPoints[GPoint][1];
+        //             AuxLocalCoordinates[2] = IntegrationPoints[GPoint][2];
+        //             rGeom.GlobalCoordinates(MyFracturePoint.Coordinates,AuxLocalCoordinates); //Note: these are the CURRENT global coordinates
 
-                    // FracturePoint Weight
-                    MyFracturePoint.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
+        //             // FracturePoint Weight
+        //             MyFracturePoint.Weight = detJContainer[GPoint]*IntegrationPoints[GPoint].Weight();
 
-                    // FracturePoint Damage
-                    MyFracturePoint.Damage = DamageVector[GPoint];
-                    //~ MyFracturePoint.StateVariable = StateVariableVector[GPoint];
+        //             // FracturePoint Damage
+        //             MyFracturePoint.Damage = DamageVector[GPoint];
+        //             //~ MyFracturePoint.StateVariable = StateVariableVector[GPoint];
 
-                    // FracturePoint Row, Column and Section
-                    Row = int((rAuxVariables.Y_max-MyFracturePoint.Coordinates[1])/rAuxVariables.RowSize);
-                    Column = int((MyFracturePoint.Coordinates[0]-rAuxVariables.X_min)/rAuxVariables.ColumnSize);
-                    Section = int((MyFracturePoint.Coordinates[2]-rAuxVariables.Z_min)/rAuxVariables.SectionSize);
-                    #pragma omp critical
-                    {
-                        rPropagationData.FracturePointsCellMatrix[Row][Column][Section].push_back(MyFracturePoint);
-                    }
-                }
-            }
-        }
+        //             // FracturePoint Row, Column and Section
+        //             Row = int((rAuxVariables.Y_max-MyFracturePoint.Coordinates[1])/rAuxVariables.RowSize);
+        //             Column = int((MyFracturePoint.Coordinates[0]-rAuxVariables.X_min)/rAuxVariables.ColumnSize);
+        //             Section = int((MyFracturePoint.Coordinates[2]-rAuxVariables.Z_min)/rAuxVariables.SectionSize);
+        //             #pragma omp critical
+        //             {
+        //                 rPropagationData.FracturePointsCellMatrix[Row][Column][Section].push_back(MyFracturePoint);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
 ///----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1529,265 +1529,265 @@ private:
         PropagationLocalVariables& rAuxPropagationVariables,
         Parameters& rParameters)
     {
-        // Check whether we have bifurcation or simple propagation
+        // // Check whether we have bifurcation or simple propagation
 
-        #pragma omp parallel sections
-        {
-            #pragma omp section
-            {
-                for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
-                {
-                    this->ComputeCosAngle(*(rAuxPropagationVariables.TopFrontFracturePoints[i]),rAuxPropagationVariables);
-                }
-            }
-            #pragma omp section
-            {
-                for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
-                {
-                    this->ComputeCosAngle(*(rAuxPropagationVariables.BotFrontFracturePoints[i]),rAuxPropagationVariables);
-                }
-            }
-        }
+        // #pragma omp parallel sections
+        // {
+        //     #pragma omp section
+        //     {
+        //         for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
+        //         {
+        //             this->ComputeCosAngle(*(rAuxPropagationVariables.TopFrontFracturePoints[i]),rAuxPropagationVariables);
+        //         }
+        //     }
+        //     #pragma omp section
+        //     {
+        //         for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
+        //         {
+        //             this->ComputeCosAngle(*(rAuxPropagationVariables.BotFrontFracturePoints[i]),rAuxPropagationVariables);
+        //         }
+        //     }
+        // }
 
-        // Compute bifurcation and propagation factors
-        const double PropagationLength = rParameters["fracture_data"]["propagation_length"].GetDouble();
-        const double PropagationCosAngle = rParameters["fracture_data"]["propagation_cosangle"].GetDouble();
-        double PropagationFactor = 0.0;
-        double PropagationFactorDenominator = 0.0;
-        double TopBifurcationFactor = 0.0;
-        double TopBifurcationFactorDenominator = 0.0;
-        double BotBifurcationFactor = 0.0;
-        double BotBifurcationFactorDenominator = 0.0;
+        // // Compute bifurcation and propagation factors
+        // const double PropagationLength = rParameters["fracture_data"]["propagation_length"].GetDouble();
+        // const double PropagationCosAngle = rParameters["fracture_data"]["propagation_cosangle"].GetDouble();
+        // double PropagationFactor = 0.0;
+        // double PropagationFactorDenominator = 0.0;
+        // double TopBifurcationFactor = 0.0;
+        // double TopBifurcationFactorDenominator = 0.0;
+        // double BotBifurcationFactor = 0.0;
+        // double BotBifurcationFactorDenominator = 0.0;
 
-        #pragma omp parallel sections reduction(+:PropagationFactor,PropagationFactorDenominator)
-        {
-            #pragma omp section
-            {
-                for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
-                {
-                    if(rAuxPropagationVariables.TopFrontFracturePoints[i]->CosAngle >= PropagationCosAngle)
-                    {
-                        this->ComputeBifurcationFactor(PropagationFactor,PropagationFactorDenominator,*(rAuxPropagationVariables.TopFrontFracturePoints[i]),PropagationLength);
-                    }
-                    else
-                    {
-                        this->ComputeBifurcationFactor(TopBifurcationFactor,TopBifurcationFactorDenominator,*(rAuxPropagationVariables.TopFrontFracturePoints[i]),PropagationLength);
-                    }
-                }
-            }
-            #pragma omp section
-            {
-                for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
-                {
-                    if(rAuxPropagationVariables.BotFrontFracturePoints[i]->CosAngle >= PropagationCosAngle)
-                    {
-                        this->ComputeBifurcationFactor(PropagationFactor,PropagationFactorDenominator,*(rAuxPropagationVariables.BotFrontFracturePoints[i]),PropagationLength);
-                    }
-                    else
-                    {
-                        this->ComputeBifurcationFactor(BotBifurcationFactor,BotBifurcationFactorDenominator,*(rAuxPropagationVariables.BotFrontFracturePoints[i]),PropagationLength);
-                    }
-                }
-            }
-        }
-        if(PropagationFactorDenominator > 1.0e-20)
-            PropagationFactor = PropagationFactor/PropagationFactorDenominator;
-        else
-            PropagationFactor = 0.0;
-        if(TopBifurcationFactorDenominator > 1.0e-20)
-            TopBifurcationFactor = TopBifurcationFactor/TopBifurcationFactorDenominator;
-        else
-            TopBifurcationFactor = 0.0;
-        if(BotBifurcationFactorDenominator > 1.0e-20)
-            BotBifurcationFactor = BotBifurcationFactor/BotBifurcationFactorDenominator;
-        else
-            BotBifurcationFactor = 0.0;
+        // #pragma omp parallel sections reduction(+:PropagationFactor,PropagationFactorDenominator)
+        // {
+        //     #pragma omp section
+        //     {
+        //         for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
+        //         {
+        //             if(rAuxPropagationVariables.TopFrontFracturePoints[i]->CosAngle >= PropagationCosAngle)
+        //             {
+        //                 this->ComputeBifurcationFactor(PropagationFactor,PropagationFactorDenominator,*(rAuxPropagationVariables.TopFrontFracturePoints[i]),PropagationLength);
+        //             }
+        //             else
+        //             {
+        //                 this->ComputeBifurcationFactor(TopBifurcationFactor,TopBifurcationFactorDenominator,*(rAuxPropagationVariables.TopFrontFracturePoints[i]),PropagationLength);
+        //             }
+        //         }
+        //     }
+        //     #pragma omp section
+        //     {
+        //         for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
+        //         {
+        //             if(rAuxPropagationVariables.BotFrontFracturePoints[i]->CosAngle >= PropagationCosAngle)
+        //             {
+        //                 this->ComputeBifurcationFactor(PropagationFactor,PropagationFactorDenominator,*(rAuxPropagationVariables.BotFrontFracturePoints[i]),PropagationLength);
+        //             }
+        //             else
+        //             {
+        //                 this->ComputeBifurcationFactor(BotBifurcationFactor,BotBifurcationFactorDenominator,*(rAuxPropagationVariables.BotFrontFracturePoints[i]),PropagationLength);
+        //             }
+        //         }
+        //     }
+        // }
+        // if(PropagationFactorDenominator > 1.0e-20)
+        //     PropagationFactor = PropagationFactor/PropagationFactorDenominator;
+        // else
+        //     PropagationFactor = 0.0;
+        // if(TopBifurcationFactorDenominator > 1.0e-20)
+        //     TopBifurcationFactor = TopBifurcationFactor/TopBifurcationFactorDenominator;
+        // else
+        //     TopBifurcationFactor = 0.0;
+        // if(BotBifurcationFactorDenominator > 1.0e-20)
+        //     BotBifurcationFactor = BotBifurcationFactor/BotBifurcationFactorDenominator;
+        // else
+        //     BotBifurcationFactor = 0.0;
 
-        // Compute Propagation Coordinates
-        const double PropagationDamage = rParameters["fracture_data"]["propagation_damage"].GetDouble();
-        const double PropagationWidth = rParameters["fracture_data"]["propagation_width"].GetDouble();
-        const double PropagationHeight = rParameters["fracture_data"]["propagation_height"].GetDouble();
-        double PropagationDistance = 0.1*PropagationLength;
-        int MotherFractureId = rParameters["fractures_list"][itFracture]["id"].GetInt();
-        array_1d<double,3> AuxArray1;
+        // // Compute Propagation Coordinates
+        // const double PropagationDamage = rParameters["fracture_data"]["propagation_damage"].GetDouble();
+        // const double PropagationWidth = rParameters["fracture_data"]["propagation_width"].GetDouble();
+        // const double PropagationHeight = rParameters["fracture_data"]["propagation_height"].GetDouble();
+        // double PropagationDistance = 0.1*PropagationLength;
+        // int MotherFractureId = rParameters["fractures_list"][itFracture]["id"].GetInt();
+        // array_1d<double,3> AuxArray1;
 
-        // Bifurcation
-        if(PropagationFactor < (0.5*PropagationDamage)
-            && TopBifurcationFactor > PropagationDamage && BotBifurcationFactor > PropagationDamage)
-        {
-            Bifurcation MyBifurcation;
-            MyBifurcation.MotherFractureId = MotherFractureId;
+        // // Bifurcation
+        // if(PropagationFactor < (0.5*PropagationDamage)
+        //     && TopBifurcationFactor > PropagationDamage && BotBifurcationFactor > PropagationDamage)
+        // {
+        //     Bifurcation MyBifurcation;
+        //     MyBifurcation.MotherFractureId = MotherFractureId;
 
-            double TopEndX = 0.0;
-            double TopEndY = 0.0;
-            double TopEndZ = 0.0;
-            double TopEndDen = 0.0;
-            double BotEndX = 0.0;
-            double BotEndY = 0.0;
-            double BotEndZ = 0.0;
-            double BotEndDen = 0.0;
+        //     double TopEndX = 0.0;
+        //     double TopEndY = 0.0;
+        //     double TopEndZ = 0.0;
+        //     double TopEndDen = 0.0;
+        //     double BotEndX = 0.0;
+        //     double BotEndY = 0.0;
+        //     double BotEndZ = 0.0;
+        //     double BotEndDen = 0.0;
 
-            #pragma omp parallel sections
-            {
-                #pragma omp section
-                {
-                    for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
-                    {
-                        this->AverageTipCoordinates(TopEndX,TopEndY,TopEndZ,TopEndDen,*(rAuxPropagationVariables.TopFrontFracturePoints[i]));
-                    }
-                }
-                #pragma omp section
-                {
-                    for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
-                    {
-                        this->AverageTipCoordinates(BotEndX,BotEndY,BotEndZ,BotEndDen,*(rAuxPropagationVariables.BotFrontFracturePoints[i]));
-                    }
-                }
-            }
+        //     #pragma omp parallel sections
+        //     {
+        //         #pragma omp section
+        //         {
+        //             for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
+        //             {
+        //                 this->AverageTipCoordinates(TopEndX,TopEndY,TopEndZ,TopEndDen,*(rAuxPropagationVariables.TopFrontFracturePoints[i]));
+        //             }
+        //         }
+        //         #pragma omp section
+        //         {
+        //             for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
+        //             {
+        //                 this->AverageTipCoordinates(BotEndX,BotEndY,BotEndZ,BotEndDen,*(rAuxPropagationVariables.BotFrontFracturePoints[i]));
+        //             }
+        //         }
+        //     }
 
-            MyBifurcation.TopTipCoordinates[0] = TopEndX/TopEndDen;
-            MyBifurcation.TopTipCoordinates[1] = TopEndY/TopEndDen;
-            MyBifurcation.TopTipCoordinates[2] = TopEndZ/TopEndDen;
+        //     MyBifurcation.TopTipCoordinates[0] = TopEndX/TopEndDen;
+        //     MyBifurcation.TopTipCoordinates[1] = TopEndY/TopEndDen;
+        //     MyBifurcation.TopTipCoordinates[2] = TopEndZ/TopEndDen;
 
-            MyBifurcation.BotTipCoordinates[0] = BotEndX/BotEndDen;
-            MyBifurcation.BotTipCoordinates[1] = BotEndY/BotEndDen;
-            MyBifurcation.BotTipCoordinates[2] = BotEndZ/BotEndDen;
+        //     MyBifurcation.BotTipCoordinates[0] = BotEndX/BotEndDen;
+        //     MyBifurcation.BotTipCoordinates[1] = BotEndY/BotEndDen;
+        //     MyBifurcation.BotTipCoordinates[2] = BotEndZ/BotEndDen;
 
-            // LeftInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[0] -= PropagationDistance;
-            AuxArray1[1] += 0.5*PropagationHeight;
-            noalias(MyBifurcation.LeftInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // RightInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[0] -= PropagationDistance;
-            AuxArray1[1] -= 0.5*PropagationHeight;
-            noalias(MyBifurcation.RightInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[0] -= PropagationDistance;
-            AuxArray1[2] += 0.5*PropagationWidth;
-            noalias(MyBifurcation.TopInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[0] -= PropagationDistance;
-            AuxArray1[2] -= 0.5*PropagationWidth;
-            noalias(MyBifurcation.BotInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // LeftInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[0] -= PropagationDistance;
+        //     AuxArray1[1] += 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.LeftInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // RightInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[0] -= PropagationDistance;
+        //     AuxArray1[1] -= 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.RightInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[0] -= PropagationDistance;
+        //     AuxArray1[2] += 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.TopInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[0] -= PropagationDistance;
+        //     AuxArray1[2] -= 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.BotInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
             
-            // Compute new TopTip RotationMatrix
-            this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyBifurcation.TopTipCoordinates,
-                                                MyBifurcation.LeftInitCoordinates,PropagationDistance);
-            // TopLeftEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] += 0.5*PropagationHeight;
-            noalias(MyBifurcation.TopLeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopRightEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] -= 0.5*PropagationHeight;
-            noalias(MyBifurcation.TopRightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopTopEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] += 0.5*PropagationWidth;
-            noalias(MyBifurcation.TopTopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopBotEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] -= 0.5*PropagationWidth;
-            noalias(MyBifurcation.TopBotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // Compute new TopTip RotationMatrix
+        //     this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyBifurcation.TopTipCoordinates,
+        //                                         MyBifurcation.LeftInitCoordinates,PropagationDistance);
+        //     // TopLeftEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] += 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.TopLeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopRightEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] -= 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.TopRightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopTopEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] += 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.TopTopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopBotEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] -= 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.TopBotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
 
-            // Compute new BotTip RotationMatrix
-            this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyBifurcation.BotTipCoordinates,
-                                                MyBifurcation.LeftInitCoordinates,PropagationDistance);
-            // BotLeftEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] += 0.5*PropagationHeight;
-            noalias(MyBifurcation.BotLeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotRightEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] -= 0.5*PropagationHeight;
-            noalias(MyBifurcation.BotRightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotTopEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] += 0.5*PropagationWidth;
-            noalias(MyBifurcation.BotTopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotBotEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] -= 0.5*PropagationWidth;
-            noalias(MyBifurcation.BotBotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // Compute new BotTip RotationMatrix
+        //     this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyBifurcation.BotTipCoordinates,
+        //                                         MyBifurcation.LeftInitCoordinates,PropagationDistance);
+        //     // BotLeftEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] += 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.BotLeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotRightEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] -= 0.5*PropagationHeight;
+        //     noalias(MyBifurcation.BotRightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotTopEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] += 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.BotTopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotBotEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] -= 0.5*PropagationWidth;
+        //     noalias(MyBifurcation.BotBotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
             
-            rPropagationData.BifurcationVector.push_back(MyBifurcation);
-        }
-        else
-        // Propagation
-        {
-            Propagation MyPropagation;
-            MyPropagation.MotherFractureId = MotherFractureId;
+        //     rPropagationData.BifurcationVector.push_back(MyBifurcation);
+        // }
+        // else
+        // // Propagation
+        // {
+        //     Propagation MyPropagation;
+        //     MyPropagation.MotherFractureId = MotherFractureId;
 
-            double TipX = 0.0;
-            double TipY = 0.0;
-            double TipZ = 0.0;
-            double TipDen = 0.0;
+        //     double TipX = 0.0;
+        //     double TipY = 0.0;
+        //     double TipZ = 0.0;
+        //     double TipDen = 0.0;
 
-            #pragma omp parallel sections reduction(+:TipX,TipY,TipZ,TipDen)
-            {
-                #pragma omp section
-                {
-                    for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
-                    {
-                        this->AverageTipCoordinates(TipX,TipY,TipZ,TipDen,*(rAuxPropagationVariables.TopFrontFracturePoints[i]));
-                    }
-                }
-                #pragma omp section
-                {
-                    for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
-                    {
-                        this->AverageTipCoordinates(TipX,TipY,TipZ,TipDen,*(rAuxPropagationVariables.BotFrontFracturePoints[i]));
-                    }
-                }
-            }
+        //     #pragma omp parallel sections reduction(+:TipX,TipY,TipZ,TipDen)
+        //     {
+        //         #pragma omp section
+        //         {
+        //             for(unsigned int i = 0; i < rAuxPropagationVariables.TopFrontFracturePoints.size(); i++)
+        //             {
+        //                 this->AverageTipCoordinates(TipX,TipY,TipZ,TipDen,*(rAuxPropagationVariables.TopFrontFracturePoints[i]));
+        //             }
+        //         }
+        //         #pragma omp section
+        //         {
+        //             for(unsigned int i = 0; i < rAuxPropagationVariables.BotFrontFracturePoints.size(); i++)
+        //             {
+        //                 this->AverageTipCoordinates(TipX,TipY,TipZ,TipDen,*(rAuxPropagationVariables.BotFrontFracturePoints[i]));
+        //             }
+        //         }
+        //     }
 
-            MyPropagation.TipCoordinates[0] = TipX/TipDen;
-            MyPropagation.TipCoordinates[1] = TipY/TipDen;
-            MyPropagation.TipCoordinates[2] = TipZ/TipDen;
+        //     MyPropagation.TipCoordinates[0] = TipX/TipDen;
+        //     MyPropagation.TipCoordinates[1] = TipY/TipDen;
+        //     MyPropagation.TipCoordinates[2] = TipZ/TipDen;
 
-            // LeftInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] += 0.5*PropagationHeight;
-            noalias(MyPropagation.LeftInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // RightInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] -= 0.5*PropagationHeight;
-            noalias(MyPropagation.RightInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] += 0.5*PropagationWidth;
-            noalias(MyPropagation.TopInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotInitCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] -= 0.5*PropagationWidth;
-            noalias(MyPropagation.BotInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // LeftInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] += 0.5*PropagationHeight;
+        //     noalias(MyPropagation.LeftInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // RightInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] -= 0.5*PropagationHeight;
+        //     noalias(MyPropagation.RightInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] += 0.5*PropagationWidth;
+        //     noalias(MyPropagation.TopInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotInitCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] -= 0.5*PropagationWidth;
+        //     noalias(MyPropagation.BotInitCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
             
-            // Compute new Tip RotationMatrix
-            this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyPropagation.TipCoordinates,
-                                                MyPropagation.LeftInitCoordinates,PropagationDistance);
-            // LeftEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] += 0.5*PropagationHeight;
-            noalias(MyPropagation.LeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // RightEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[1] -= 0.5*PropagationHeight;
-            noalias(MyPropagation.RightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // TopEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] += 0.5*PropagationWidth;
-            noalias(MyPropagation.TopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
-            // BotEndCoordinates
-            noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
-            AuxArray1[2] -= 0.5*PropagationWidth;
-            noalias(MyPropagation.BotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // Compute new Tip RotationMatrix
+        //     this->CalculateNewTipRotationMatrix(rAuxPropagationVariables,MyPropagation.TipCoordinates,
+        //                                         MyPropagation.LeftInitCoordinates,PropagationDistance);
+        //     // LeftEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] += 0.5*PropagationHeight;
+        //     noalias(MyPropagation.LeftEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // RightEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[1] -= 0.5*PropagationHeight;
+        //     noalias(MyPropagation.RightEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // TopEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] += 0.5*PropagationWidth;
+        //     noalias(MyPropagation.TopEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
+        //     // BotEndCoordinates
+        //     noalias(AuxArray1) = rAuxPropagationVariables.TipLocalCoordinates;
+        //     AuxArray1[2] -= 0.5*PropagationWidth;
+        //     noalias(MyPropagation.BotEndCoordinates) = prod(trans(rAuxPropagationVariables.RotationMatrix),AuxArray1);
             
-            rPropagationData.PropagationVector.push_back(MyPropagation);
-        }
+        //     rPropagationData.PropagationVector.push_back(MyPropagation);
+        // }
     }
 
 ///----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

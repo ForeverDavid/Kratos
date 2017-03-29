@@ -87,7 +87,7 @@ public:
         const int ndof = static_cast<int>(rDofSet.size());
         typename DofsArrayType::iterator DofBegin = rDofSet.begin();
 
-        #pragma omp parallel for firstprivate(DofBegin)
+        // #pragma omp parallel for firstprivate(DofBegin)
         for(int i = 0;  i < ndof; i++)
         {
             typename DofsArrayType::iterator itDof = DofBegin + i;

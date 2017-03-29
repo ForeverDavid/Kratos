@@ -85,7 +85,7 @@ public:
         double CharacteristicLength = (*pParameters)["characteristic_length"].GetDouble();
         
         // Loop through all Gauss Points
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int i = 0; i < NGPoints; i++)
         {
             double LocalEquivalentStrain;

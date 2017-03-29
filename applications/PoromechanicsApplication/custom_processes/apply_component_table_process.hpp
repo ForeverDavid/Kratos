@@ -96,7 +96,7 @@ public:
         {
             ModelPart::NodesContainerType::iterator it_begin = mr_model_part.GetMesh(mmesh_id).NodesBegin();
 
-            #pragma omp parallel for
+            // #pragma omp parallel for
             for(int i = 0; i<nnodes; i++)
             {
                 ModelPart::NodesContainerType::iterator it = it_begin + i;
@@ -130,7 +130,7 @@ public:
         {
             ModelPart::NodesContainerType::iterator it_begin = mr_model_part.GetMesh(mmesh_id).NodesBegin();
 
-            #pragma omp parallel for
+            // #pragma omp parallel for
             for(int i = 0; i<nnodes; i++)
             {
                 ModelPart::NodesContainerType::iterator it = it_begin + i;
