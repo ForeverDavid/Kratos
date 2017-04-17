@@ -111,5 +111,5 @@ cmake ..                                                                      \
 
 #decomment this to have it verbose
 # make VERBOSE=1 -j4
-make -j2
+make -j4
 make install
