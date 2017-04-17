@@ -44,8 +44,8 @@ cmake ..                                                                      \
 \
 -DMULTI_BODY_DYNAMICS_APPLICATION=ON                                          \
 \
--DTEST_APPLICATION=OFF                                                        \
--DPURE_DIFFUSION_APPLICATION=ON                                               \
+#-DTEST_APPLICATION=OFF                                                        \
+#-DPURE_DIFFUSION_APPLICATION=ON                                               \
 \
 -DADJOINT_FLUID_APPLICATION=ON                                                \
 -DCONSTITUTIVE_LAWS_APPLICATION=ON                                            \
@@ -104,7 +104,7 @@ cmake ..                                                                      \
 -DTRILINOS_ROOT="$HOME/compiled_libraries/trilinos-10.2.0"                    \
 \
 #-DCMAKE_BUILD_TYPE=Debug                                                      \
--DCMAKE_BUILD_TYPE=RelWithDebInfo                                             \
+#-DCMAKE_BUILD_TYPE=RelWithDebInfo                                             \
 #-DKRATOS_DEBUG=ON                                                             \
 #-DDO_NOT_DEFINE_NDEBUG=ON                                                     \
 
