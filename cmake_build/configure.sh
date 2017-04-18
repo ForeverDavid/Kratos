@@ -113,3 +113,7 @@ cmake ..                                                                      \
 # make VERBOSE=1 -j4
 make -j4
 make install
+
+echo "export PYTHONPATH=$PYTHONPATH:$HOME/opt/kratos" >> $HOME/.bashrc
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/opt/kratos/libs" >> $HOME/.bashrc
+source $HOME/.bashrc
